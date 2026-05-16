@@ -3,11 +3,15 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const { currentUser, logout } = useAuth();
-
+  const { darkMode, setDarkMode } = useAuth();
   return (
     <nav className="navbar">
       <h2>HireFlow</h2>
-
+      <button
+        onClick={() => setDarkMode(!darkMode)}
+      >
+        {darkMode ? "☀️" : "🌙"}
+      </button>
       <div className="nav-links">
         <Link to="/">Home</Link>
         <Link to="/jobs">Jobs</Link>

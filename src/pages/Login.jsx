@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import { useAuth } from "../context/AuthContext";
 import { getUsers } from "../utils/storage";
 
 export default function Login() {
   const navigate = useNavigate();
-
   const { login } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -22,12 +22,12 @@ export default function Login() {
     );
 
     if (!user) {
-      alert("Invalid Credentials");
+      toast.error("Invalid Credentials");
       return;
     }
 
     login(user);
-
+    toast.success(`Welcome back, ${user.name}!`);
     navigate("/dashboard");
   }
 
@@ -38,13 +38,17 @@ export default function Login() {
       <input
         type="email"
         placeholder="Email"
+        value={email}
         onChange={(e) => setEmail(e.target.value)}
+        required
       />
 
       <input
         type="password"
         placeholder="Password"
+        value={password}
         onChange={(e) => setPassword(e.target.value)}
+        required
       />
 
       <button type="submit">Login</button>

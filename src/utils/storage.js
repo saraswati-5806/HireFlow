@@ -142,3 +142,16 @@ export function seedDemoData() {
 
   localStorage.setItem("seeded", "true");
 }
+
+export function getBookmarks() {
+  return JSON.parse(
+    localStorage.getItem("bookmarks")
+  ) || [];
+}
+
+export function saveBookmarks(bookmarks) {
+  localStorage.setItem(
+    "bookmarks",
+    JSON.stringify(bookmarks)
+  );
+}

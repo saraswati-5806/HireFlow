@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import {
   getCurrentUser,
   setCurrentUser,
@@ -9,6 +9,16 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [currentUser, setUser] = useState(getCurrentUser());
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Automatically toggles a class on the body tag for dark mode styles
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add("dark-theme");
+    } else {
+      document.body.classList.remove("dark-theme");
+    }
+  }, [darkMode]);
 
   function login(user) {
     setCurrentUser(user);
@@ -20,8 +30,17 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
+  // Optimize the context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({
+    currentUser,
+    login,
+    logout,
+    darkMode,
+    setDarkMode,
+  }), [currentUser, darkMode]);
+
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

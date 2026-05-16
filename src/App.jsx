@@ -4,7 +4,7 @@ import {
   Route,
 } from "react-router-dom";
 
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -18,26 +18,23 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 
 import { seedDemoData } from "./utils/storage";
-
+<Route path="/admin" element={<Admin />} />
 seedDemoData();
 
-export default function App() {
-  return (
-    <AuthProvider>
-      <BrowserRouter>
+// 1. Create an inner component to safely access useAuth()
+function AppContent() {
+  const { darkMode } = useAuth();
 
+  return (
+    <div className={darkMode ? "dark" : ""}>
+      <BrowserRouter>
         <Navbar />
 
         <Routes>
-
           <Route path="/" element={<Home />} />
-
           <Route path="/jobs" element={<Jobs />} />
-
           <Route path="/jobs/:id" element={<JobDetail />} />
-
           <Route path="/login" element={<Login />} />
-
           <Route path="/signup" element={<Signup />} />
 
           <Route
@@ -48,12 +45,19 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
         </Routes>
 
         <Footer />
-
       </BrowserRouter>
+    </div>
+  );
+}
+
+// 2. Keep App as the main export, initializing the Provider wrapper
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
     </AuthProvider>
   );
 }

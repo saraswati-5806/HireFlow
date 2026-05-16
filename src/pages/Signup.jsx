@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import { getUsers, saveUsers } from "../utils/storage";
 import { useAuth } from "../context/AuthContext";
 
 export default function Signup() {
   const navigate = useNavigate();
-
   const { login } = useAuth();
 
   const [form, setForm] = useState({
@@ -22,17 +22,26 @@ export default function Signup() {
 
     const users = getUsers();
 
+    // Check if a user with the same email already exists
+    const userExists = users.some(
+      (u) => u.email.toLowerCase() === form.email.toLowerCase()
+    );
+
+    if (userExists) {
+      toast.error("User Exists with this email address");
+      return;
+    }
+
     const newUser = {
       id: Date.now().toString(),
       ...form,
     };
 
     users.push(newUser);
-
     saveUsers(users);
-
     login(newUser);
 
+    toast.success("Account Created Successfully!");
     navigate("/dashboard");
   }
 
@@ -42,29 +51,37 @@ export default function Signup() {
 
       <input
         placeholder="Name"
+        value={form.name}
         onChange={(e) =>
           setForm({ ...form, name: e.target.value })
         }
+        required
       />
 
       <input
+        type="email"
         placeholder="Email"
+        value={form.email}
         onChange={(e) =>
           setForm({ ...form, email: e.target.value })
         }
+        required
       />
 
       <input
         type="password"
         placeholder="Password"
+        value={form.password}
         onChange={(e) =>
           setForm({ ...form, password: e.target.value })
         }
+        required
       />
 
       <select
+        value={form.role}
         onChange={(e) =>
-          setForm({ ...form, role: e.target.value })
+          setForm({ ...form, role: e.target.value, company: "" })
         }
       >
         <option value="candidate">Candidate</option>
@@ -73,10 +90,12 @@ export default function Signup() {
 
       {form.role === "employer" && (
         <input
-          placeholder="Company"
+          placeholder="Company Name"
+          value={form.company}
           onChange={(e) =>
             setForm({ ...form, company: e.target.value })
           }
+          required
         />
       )}
 
