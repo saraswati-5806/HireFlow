@@ -127,3 +127,8 @@ export async function getApplicationsByCandidate(candidateId) {
 export async function getApplicationsByJob(jobId) {
   return [];
 }
+
+// 5. Final fallback to satisfy App.jsx mounting logic
+export function seedDemoData() {
+  // Intentionally blank! SQLite handles its own seeding on server boot up now.
+}
