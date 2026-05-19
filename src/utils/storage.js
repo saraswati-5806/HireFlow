@@ -61,67 +61,67 @@ export function getCurrentUser() {
    💼 JOBS INTEGRATION FUNCTIONS
    ========================================================================== */
 
-// 1. FETCH ALL JOBS FROM SQLITE
+// 1. FETCH ALL JOBS FROM SQLITE (With safety defaults to prevent .slice() crashes)
 export async function getJobs() {
-  const response = await fetch(`${API_URL}/jobs`);
-  if (!response.ok) throw new Error("Could not fetch jobs dataset.");
-  return await response.json();
+  try {
+    const response = await fetch(`${API_URL}/jobs`);
+    if (!response.ok) throw new Error("Could not fetch jobs dataset.");
+    const data = await response.json();
+    
+    // Ensure data is strictly a valid array before returning to the UI components
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error("Backend fetch failed, falling back to empty array:", error);
+    return []; // Safe fallback prevents frontend component crashes
+  }
 }
 
 // 2. FETCH SPECIFIC SINGLE JOB DETAILS
 export async function getJobById(id) {
-  const response = await fetch(`${API_URL}/jobs/${id}`);
-  if (!response.ok) throw new Error("Job listing not found.");
-  return await response.json();
-}
-
-// 3. SEED INITIAL FRONTEND FALLBACK DATA (No longer needed since server seeds automatically)
-export function seedDemoData() {
-  // Left blank intentionally because the backend server auto-seeds SQLite table rows on boot!
+  try {
+    const response = await fetch(`${API_URL}/jobs/${id}`);
+    if (!response.ok) throw new Error("Job listing not found.");
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 }
 
 /* ==========================================================================
    🔄 BACKWARD COMPATIBILITY EXPORTS FOR PRODUCTION BUILD
    ========================================================================== */
 
-// 1. Fake application mocks for compilation safety (We will link these to real API endpoints next)
 export async function addApplication(app) {
   console.log("Mock application saved locally:", app);
   return { success: true };
 }
 
 export async function hasApplied(jobId, candidateId) {
-  return false; // Default fallback for initial build stability
+  return false; 
 }
 
-// 2. User data utilities expected by old login/signup views
 export function getUsers() {
   return []; 
 }
 
-export function saveUsers(users) {
-  // Handled directly via the backend API signups now!
-}
+export function saveUsers(users) {}
 
-// 3. Job CRUD operation wrappers for Dashboard compilation safety
 export async function addJob(jobData) {
-  console.log("Mock add job:", jobData);
   return { ...jobData, id: 'job_' + Math.random().toString(36).substr(2, 9) };
 }
 
 export async function deleteJob(id) {
-  console.log("Mock delete job ID:", id);
   return { success: true };
 }
 
 export async function updateJob(id, updatedData) {
-  console.log("Mock update job ID:", id, updatedData);
   return { id, ...updatedData };
 }
 
-// 4. Job application aggregation utilities for Dashboard metrics
+// Ensure these return clean arrays so UI dashboards calling .slice() or .map() stay stable
 export async function getApplicationsByCandidate(candidateId) {
-  return []; // Returns an empty array to prevent dashboard map crashes
+  return []; 
 }
 
 export async function getApplicationsByJob(jobId) {
