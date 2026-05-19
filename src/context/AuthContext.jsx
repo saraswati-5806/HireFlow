@@ -1,8 +1,9 @@
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
-import {
-  getCurrentUser,
-  setCurrentUser,
-  clearCurrentUser,
+import { 
+  loginUser, 
+  signupUser, 
+  logoutUser, 
+  getCurrentUser 
 } from "../utils/storage";
 
 const AuthContext = createContext();
@@ -20,20 +21,38 @@ export function AuthProvider({ children }) {
     }
   }, [darkMode]);
 
-  function login(user) {
-    setCurrentUser(user);
-    setUser(user);
-  }
+  // 1. Asynchronous Login connecting to the Express Server
+  const login = async (email, password) => {
+    try {
+      const loggedInUser = await loginUser(email, password);
+      setUser(loggedInUser);
+    } catch (error) {
+      // Passes the backend's error message (like "Incorrect account password") up to your Form components
+      throw error;
+    }
+  };
 
-  function logout() {
-    clearCurrentUser();
+  // 2. Asynchronous Signup connecting to the Express Server
+  const signup = async (userData) => {
+    try {
+      const registeredUser = await signupUser(userData);
+      setUser(registeredUser);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // 3. Logout handler to clear backend session state tokens
+  const logout = () => {
+    logoutUser();
     setUser(null);
-  }
+  };
 
-  // Optimize the context value to prevent unnecessary re-renders
+  // Optimize the context value to prevent unnecessary re-renders across dashboard layouts
   const value = useMemo(() => ({
     currentUser,
     login,
+    signup,
     logout,
     darkMode,
     setDarkMode,
