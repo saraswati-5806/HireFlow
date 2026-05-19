@@ -102,3 +102,28 @@ export function getUsers() {
 export function saveUsers(users) {
   // Handled directly via the backend API signups now!
 }
+
+// 3. Job CRUD operation wrappers for Dashboard compilation safety
+export async function addJob(jobData) {
+  console.log("Mock add job:", jobData);
+  return { ...jobData, id: 'job_' + Math.random().toString(36).substr(2, 9) };
+}
+
+export async function deleteJob(id) {
+  console.log("Mock delete job ID:", id);
+  return { success: true };
+}
+
+export async function updateJob(id, updatedData) {
+  console.log("Mock update job ID:", id, updatedData);
+  return { id, ...updatedData };
+}
+
+// 4. Job application aggregation utilities for Dashboard metrics
+export async function getApplicationsByCandidate(candidateId) {
+  return []; // Returns an empty array to prevent dashboard map crashes
+}
+
+export async function getApplicationsByJob(jobId) {
+  return [];
+}
