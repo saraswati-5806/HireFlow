@@ -1,12 +1,19 @@
 // ==========================================================================
-// 📦 HIREFLOW SYSTEM ENGINE -  BROWSER LOCALSTORAGE DATA LAYER
+// 📦 HIREFLOW SYSTEM ENGINE - BROWSER LOCALSTORAGE DATA LAYER (FIXED & SYNCHRONOUS)
 // ==========================================================================
+
+const KEYS = {
+  JOBS: "hireflow_jobs",
+  APPLICATIONS: "hireflow_applications",
+  USERS: "users",
+  CURRENT_USER: "currentUser"
+};
 
 function seedDatabase() {
   if (typeof window === "undefined") return;
 
   // 1. Initial Seed Matrix: 22 Full Professional Jobs
-  if (!localStorage.getItem("hireflow_jobs")) {
+  if (!localStorage.getItem(KEYS.JOBS)) {
     const defaultJobs = [
       { id: "j_1", title: "Senior Frontend Engineer", company: "AuraStream Tech", location: "Remote, India", type: "Full Time", salary: "₹18L - ₹24L", category: "Tech", description: "Build scalable UI architectures with modern core state tracking systems.", requirements: ["React", "TypeScript", "Tailwind CSS"], postedBy: "emp_infosys" },
       { id: "j_2", title: "Data Analyst", company: "FinTech Solutions", location: "Mumbai, MH", type: "Full Time", salary: "₹12L - ₹18L", category: "Data", description: "Interpret complex core metric data frameworks and build pipeline dashboards.", requirements: ["Python", "SQL", "Tableau"], postedBy: "emp_infosys" },
@@ -31,80 +38,84 @@ function seedDatabase() {
       { id: "j_21", title: "Business Analyst", company: "Strategy Partners", location: "Pune, MH", type: "Full Time", salary: "₹11L - ₹15L", category: "Management", description: "Bridge the gap between product requirements and developer output metrics.", requirements: ["Agile Documentation", "SQL", "UML Modeling"], postedBy: "emp_tata" },
       { id: "j_22", title: "Technical Support Tier 2", company: "Core Hosters", location: "Remote", type: "Full Time", salary: "₹6L - ₹8L", category: "Customer Support", description: "Investigate API communication drops, server runtime errors, and domain blocks.", requirements: ["Linux Shell", "DNS Configuration", "APIs"], postedBy: "emp_infosys" }
     ];
-    localStorage.setItem("hireflow_jobs", JSON.stringify(defaultJobs));
+    localStorage.setItem(KEYS.JOBS, JSON.stringify(defaultJobs));
   }
 
-  if (!localStorage.getItem("hireflow_applications")) {
-    localStorage.setItem("hireflow_applications", JSON.stringify([]));
+  if (!localStorage.getItem(KEYS.APPLICATIONS)) {
+    localStorage.setItem(KEYS.APPLICATIONS, JSON.stringify([]));
   }
 }
 
 seedDatabase();
 
-// 2. DATA READ INTERFACES
-export async function getJobs() {
-  const data = localStorage.getItem("hireflow_jobs");
-  return data ? JSON.parse(data) : [];
+// 2. DATA READ INTERFACES (SYNCHRONOUS FIX)
+export function getJobs() {
+  try {
+    const data = localStorage.getItem(KEYS.JOBS);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    return [];
+  }
 }
 
-export async function getJobById(id) {
-  const jobs = await getJobs();
+export function getJobById(id) {
+  const jobs = getJobs();
   return jobs.find(j => j.id === id) || null;
 }
 
-// 3. EMPLOYER WRITE/UPDATE/DELETE INTERFACES (Full CRUD)
-export async function addJob(jobData) {
-  const jobs = await getJobs();
+// 3. EMPLOYER WRITE/UPDATE/DELETE INTERFACES (Full CRUD - SYNCHRONOUS FIX)
+export function addJob(jobData) {
+  const jobs = getJobs();
   const newJob = {
     ...jobData,
     id: "j_" + Math.random().toString(36).substr(2, 9),
     requirements: Array.isArray(jobData.requirements) ? jobData.requirements : ["React", "JavaScript"]
   };
   jobs.push(newJob);
-  localStorage.setItem("hireflow_jobs", JSON.stringify(jobs));
+  localStorage.setItem(KEYS.JOBS, JSON.stringify(jobs));
   return newJob;
 }
 
-export async function updateJob(updatedJob) {
-  const jobs = await getJobs();
+export function updateJob(updatedJob) {
+  const jobs = getJobs();
   const index = jobs.findIndex(j => j.id === updatedJob.id);
   if (index !== -1) {
     jobs[index] = { ...jobs[index], ...updatedJob };
-    localStorage.setItem("hireflow_jobs", JSON.stringify(jobs));
+    localStorage.setItem(KEYS.JOBS, JSON.stringify(jobs));
     return true;
   }
   return false;
 }
 
-export async function deleteJob(id) {
-  const jobs = await getJobs();
+export function deleteJob(id) {
+  const jobs = getJobs();
   const filtered = jobs.filter(j => j.id !== id);
-  localStorage.setItem("hireflow_jobs", JSON.stringify(filtered));
+  localStorage.setItem(KEYS.JOBS, JSON.stringify(filtered));
   
   // Clean up orphan records from application registries
-  const apps = JSON.parse(localStorage.getItem("hireflow_applications") || "[]");
+  const apps = getApplications();
   const filteredApps = apps.filter(a => a.jobId !== id);
-  localStorage.setItem("hireflow_applications", JSON.stringify(filteredApps));
+  localStorage.setItem(KEYS.APPLICATIONS, JSON.stringify(filteredApps));
   return { success: true };
 }
 
-// 4. CANDIDATE SUBMISSION INTERFACES
-export async function addApplication(appData) {
-  const apps = JSON.parse(localStorage.getItem("hireflow_applications") || "[]");
+// 4. CANDIDATE SUBMISSION INTERFACES (SYNCHRONOUS FIX)
+export function addApplication(appData) {
+  const apps = getApplications();
   const newApp = {
     ...appData,
     id: "app_" + Math.random().toString(36).substr(2, 9),
     appliedAt: new Date().toLocaleDateString()
   };
   apps.push(newApp);
-  localStorage.setItem("hireflow_applications", JSON.stringify(apps));
+  localStorage.setItem(KEYS.APPLICATIONS, JSON.stringify(apps));
   return { success: true };
 }
 
-// 5. ROLE-SPECIFIC DASHBOARD COMPILING DATA
-export async function getEmployerDashboard(employerId) {
-  const jobs = await getJobs();
-  const apps = JSON.parse(localStorage.getItem("hireflow_applications") || "[]");
+// 5. ROLE-SPECIFIC DASHBOARD COMPILING DATA (SYNCHRONOUS FIX)
+export function getEmployerDashboard(employerId) {
+  const jobs = getJobs();
+  const apps = getApplications();
 
   const myJobs = jobs.filter(j => j.postedBy === employerId);
   const myJobIds = myJobs.map(j => j.id);
@@ -116,9 +127,9 @@ export async function getEmployerDashboard(employerId) {
   return { totalJobs: myJobs.length, totalApplications: myApps.length, applications: myApps };
 }
 
-export async function getCandidateApplications(candidateId) {
-  const jobs = await getJobs();
-  const apps = JSON.parse(localStorage.getItem("hireflow_applications") || "[]");
+export function getCandidateApplications(candidateId) {
+  const jobs = getJobs();
+  const apps = getApplications();
   
   const myApps = apps.filter(a => a.candidateId === candidateId);
   return myApps.map(a => {
@@ -132,15 +143,64 @@ export async function getCandidateApplications(candidateId) {
   });
 }
 
-// 6. PERSISTENCE LAYER COMPATIBILITY SHIMS
-export function setCurrentUser(user) { localStorage.setItem("currentUser", JSON.stringify(user)); }
-export function clearCurrentUser() { localStorage.removeItem("currentUser"); }
-export async function hasApplied() { return false; }
-export function getUsers() { return []; }
-export function saveUsers() {}
+// 6. USER CHANNEL & PERSISTENCE LAYER CONTROLS (FULL WORKING IMPLEMENTATION)
+export function getUsers() {
+  try {
+    return JSON.parse(localStorage.getItem(KEYS.USERS)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function saveUsers(users) {
+  localStorage.setItem(KEYS.USERS, JSON.stringify(users));
+}
+
+export function getCurrentUser() {
+  try {
+    const user = localStorage.getItem(KEYS.CURRENT_USER);
+    return user ? JSON.parse(user) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export function setCurrentUser(user) { 
+  if (user) {
+    localStorage.setItem(KEYS.CURRENT_USER, JSON.stringify(user)); 
+  } else {
+    localStorage.removeItem(KEYS.CURRENT_USER);
+  }
+}
+
+export function clearCurrentUser() { 
+  localStorage.removeItem(KEYS.CURRENT_USER); 
+}
+
+export function getApplications() {
+  try {
+    return JSON.parse(localStorage.getItem(KEYS.APPLICATIONS)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function getApplicationsByJob(jobId) {
+  const apps = getApplications();
+  return apps.filter(app => app.jobId === jobId);
+}
+
+export function getApplicationsByCandidate(candidateId) {
+  const apps = getApplications();
+  return apps.filter(app => app.candidateId === candidateId);
+}
+
+export function hasApplied(jobId, candidateId) {
+  const apps = getApplications();
+  return apps.some(app => app.jobId === jobId && app.candidateId === candidateId);
+}
+
 export function seedDemoData() {}
-export async function getApplicationsByCandidate() { return []; }
-export async function getApplicationsByJob() { return []; }
 
 /* ==========================================================================
    🎨 INJECT CUSTOM "COOL WATERS" STYLE VARIABLES 

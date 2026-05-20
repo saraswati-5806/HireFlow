@@ -3,73 +3,59 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleLoginSubmit = (e) => {
+  const handleFormSubmit = (e) => {
     e.preventDefault();
-    setError("");
+    try {
+      setError("");
 
-    // Read users directly out of browser memory
-    const existingUsers = JSON.parse(localStorage.getItem("hireflow_users") || "[]");
-    
-    // Find matching profile record
-    const userMatch = existingUsers.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-    );
+      // 🔍 Read from unified system schema array
+      const storedUsers = JSON.parse(localStorage.getItem("hireflow_users") || "[]");
 
-    if (userMatch) {
-      localStorage.setItem("currentUser", JSON.stringify(userMatch));
-      if (login) login(userMatch);
+      const matchedUser = storedUsers.find(
+        (u) => u.email === email && u.password === password
+      );
+
+      if (!matchedUser) {
+        setError("Invalid email address or matching security password parameters.");
+        return;
+      }
+
+      // 🌟 Pass whole object profile structure securely into our context tree
+      login(matchedUser);
       navigate("/dashboard");
-    } else {
-      setError("Invalid email address or password combination. Please try again.");
+
+    } catch (err) {
+      setError(err.message || "Failed to finalize authentication session routing.");
     }
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "75vh", padding: "2rem" }}>
-      <div className="card" style={{ width: "100%", maxWidth: "420px", padding: "2.5rem", background: "white", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-        
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <h2 style={{ fontSize: "1.75rem", margin: "0 0 0.5rem 0", color: "#115e59" }}>Welcome Back</h2>
-          <p style={{ color: "#64748b", margin: "0", fontSize: "0.95rem" }}>Log in to manage jobs or apply to openings.</p>
+    <div style={{ maxWidth: "400px", margin: "4rem auto", padding: "2rem" }} className="form">
+      <h2>Account Login</h2>
+      {error && <p style={{ color: "#ef4444", fontSize: "0.9rem" }}>⚠️ {error}</p>}
+      
+      <form onSubmit={handleFormSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <div>
+          <label style={{ display: "block", marginBottom: "0.25rem" }}>Email Address</label>
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: "100%", padding: "0.5rem" }} />
         </div>
-
-        {error && (
-          <div style={{ padding: "0.75rem", background: "#fef2f2", color: "#991b1b", borderRadius: "6px", fontSize: "0.9rem", marginBottom: "1.25rem", border: "1px solid #fee2e2" }}>
-            ⚠️ {error}
-          </div>
-        )}
-
-        <form onSubmit={handleLoginSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-            <label style={{ fontSize: "0.9rem", fontWeight: "600" }}>Email Address</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@example.com" style={{ width: "100%", boxSizing: "border-box" }} />
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-            <label style={{ fontSize: "0.9rem", fontWeight: "600" }}>Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" style={{ width: "100%", boxSizing: "border-box" }} />
-          </div>
-
-          <button type="submit" className="btn" style={{ width: "100%", padding: "0.75rem", fontSize: "1rem", marginTop: "0.5rem" }}>
-            Log In
-          </button>
-        </form>
-
-        <div style={{ textAlign: "center", marginTop: "1.5rem", borderTop: "1px solid #f1f5f9", paddingTop: "1rem", fontSize: "0.9rem", color: "#64748b" }}>
-          Don't have an account?{" "}
-          <Link to="/signup" style={{ color: "#0d9488", fontWeight: "600", textDecoration: "none" }}>
-            Sign Up Here
-          </Link>
+        <div>
+          <label style={{ display: "block", marginBottom: "0.25rem" }}>Password</label>
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: "100%", padding: "0.5rem" }} />
         </div>
-
-      </div>
+        <button type="submit" style={{ background: "#0d9488", color: "white", padding: "0.75rem", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer" }}>
+          Authenticate Session
+        </button>
+      </form>
+      <p style={{ marginTop: "1rem", fontSize: "0.9rem" }}>
+        New to the pipeline? <Link to="/signup" style={{ color: "#0d9488" }}>Create an account</Link>
+      </p>
     </div>
   );
 }

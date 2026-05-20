@@ -1,7 +1,8 @@
 import { useAuth } from "../context/AuthContext";
 
 export default function InfoModals({ type, onClose }) {
-  const { currentUser } = useAuth();
+  const auth = useAuth();
+  const currentUser = auth ? auth.currentUser : null;
 
   const getContent = () => {
     switch (type) {
@@ -12,7 +13,7 @@ export default function InfoModals({ type, onClose }) {
             <div>
               <p><strong>Name / ID:</strong> {currentUser.name || currentUser.username || "Candidate Workspace Member"}</p>
               <p><strong>Email Node:</strong> {currentUser.email || "student@hireflow.edu"}</p>
-              <p><strong>System Clearance:</strong> {currentUser.role}</p>
+              <p><strong>System Clearance:</strong> {currentUser?.role || "Guest"}</p>
               <p><strong>Storage Status:</strong> Verified Local Cache Node Active</p>
             </div>
           ) : (

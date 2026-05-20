@@ -1,63 +1,29 @@
-import { useState, useEffect } from "react";
-// Import everything as a structural storage object to satisfy the bundler compilation
-import * as storage from "../utils/storage";
-import { Link } from "react-router-dom";
-import JobCard from "../components/JobCard";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
-  const [homeJobs, setHomeJobs] = useState([]); 
-  const [loading, setLoading] = useState(true);
-
-  // Fetch jobs safely from backend server database on page mount
-  useEffect(() => {
-    async function loadHomeData() {
-      try {
-        // Use the wildcard object reference here safely
-        const data = await storage.getJobs();
-        setHomeJobs(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error("Failed to parse home listings:", error);
-        setHomeJobs([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadHomeData();
-  }, []);
-
-  // Take up to 4 elements safely for the featured grid display
-  const featuredJobs = homeJobs.slice(0, 4);
+  const navigate = useNavigate();
 
   return (
-    <div className="home-container" style={{ padding: "2rem 0", textAlign: "center" }}>
-      <div className="hero-section" style={{ marginBottom: "3rem" }}>
-        <h1 style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>Find Your Dream Job</h1>
-        <p style={{ color: "#666" }}>Connect with top companies and employers.</p>
+    <div style={{ maxWidth: "900px", margin: "4rem auto", padding: "0 2rem", textAlign: "center" }}>
+      <h1 style={{ fontSize: "3rem", color: "#0d9488", marginBottom: "1rem" }}>Streamline Your Engineering Placement Loop</h1>
+      <p style={{ fontSize: "1.2rem", color: "#475569", marginBottom: "2.5rem", lineHeight: "1.6" }}>
+        HireFlow bridges the gap between software engineering candidates and active technical placement matrices using client-side memory spaces.
+      </p>
+
+      <div style={{ display: "flex", justifyContent: "center", gap: "1.5rem", marginBottom: "4rem" }}>
+        <button onClick={() => navigate("/jobs")} style={{ padding: "1rem 2rem", fontSize: "1.1rem" }}>
+          Explore Openings
+        </button>
+        <button onClick={() => navigate("/signup")} style={{ padding: "1rem 2rem", fontSize: "1.1rem", background: "#115e59" }}>
+          Register Node
+        </button>
       </div>
 
-      <div className="featured-section" style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1rem" }}>
-        <h2 style={{ textAlign: "left", marginBottom: "1.5rem" }}>Featured Jobs</h2>
-
-        {loading ? (
-          <p>Loading curated listings...</p>
-        ) : featuredJobs.length > 0 ? (
-          <div className="job-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
-            {featuredJobs.map((job) => (
-              <JobCard key={job.id} job={job} />
-            ))}
-          </div>
-        ) : (
-          <div style={{ padding: "3rem 1rem", border: "1px dashed #ccc", borderRadius: "8px", background: "#f9f9f9" }}>
-            <p style={{ color: "#555", marginBottom: "1rem" }}>No featured listings found.</p>
-            <p style={{ fontSize: "0.85rem", color: "#888" }}>Make sure your local Node backend server is running on port 5000!</p>
-          </div>
-        )}
-
-        <div style={{ marginTop: "2.5rem" }}>
-          <Link to="/jobs" className="btn btn-primary" style={{ padding: "0.75rem 1.5rem", background: "#7c3aed", color: "#fff", borderRadius: "5px", textDecoration: "none", fontWeight: "600" }}>
-            See All Openings
-          </Link>
-        </div>
+      <div style={{ background: "#e0f2fe", padding: "2rem", borderRadius: "8px", border: "1px solid #0d9488", color: "#0f172a" }}>
+        <h3>💡 Engineering Architecture Directive</h3>
+        <p style={{ margin: "0.5rem 0 0 0", fontSize: "0.95rem", lineHeight: "1.5" }}>
+          This interface compiles and maps operations straight to browser local memory cells. No isolated backend runtime engine threads are required to sustain current mock validation testing.
+        </p>
       </div>
     </div>
   );

@@ -1,101 +1,84 @@
-import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import * as storage from "../utils/storage"; // <-- Standardized Wildcard Fix
+import * as storage from "../utils/storage";
 
 export default function JobDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  
   const [job, setJob] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [applied, setApplied] = useState(false);
 
   useEffect(() => {
-    async function loadJobDetails() {
-      const data = await storage.getJobById(id);
-      setJob(data);
-      setLoading(false);
-    }
-    loadJobDetails();
+    const jobRecord = storage.getJobById(id);
+    setJob(jobRecord);
   }, [id]);
 
-  const handleApply = async () => {
+  const handleApply = () => {
     if (!currentUser) {
-      alert("Please log in to submit your job application.");
+      alert("Session check expired. Authenticate registration vectors before applying.");
       navigate("/login");
       return;
     }
 
-    const applicationPayload = {
+    // 🛡️ Guard Block: Detects and filters duplicated application submissions
+    const existingApps = JSON.parse(localStorage.getItem("hireflow_applications") || "[]");
+    const alreadyApplied = existingApps.find(
+      (a) => a.jobId === job.id && a.candidateId === currentUser.id
+    );
+
+    if (alreadyApplied) {
+      alert("System Warning: You have already routed a placement file payload to this job ID.");
+      return;
+    }
+
+    storage.addApplication({
       jobId: job.id,
       candidateId: currentUser.id,
-      candidateName: currentUser.name,
+      candidateName: currentUser.name || "Engineering Member",
       candidateEmail: currentUser.email
-    };
+    });
 
-    await storage.addApplication(applicationPayload);
-    setApplied(true);
-    alert(`Success! Your application for ${job.title} has been logged in the backend database.`);
+    alert("Application packet routed successfully to browser local node indices.");
+    navigate("/dashboard");
   };
 
-  if (loading) return <div style={{ padding: "3rem", textAlign: "center" }}>Loading position metrics...</div>;
-  if (!job) return <div style={{ padding: "3rem", textAlign: "center" }}>Job position not found.</div>;
+  if (!job) {
+    return <div style={{ padding: "4rem", textAlign: "center" }}><h3>Target resource indexing failed...</h3></div>;
+  }
 
   return (
-    <div className="container" style={{ maxWidth: "800px", margin: "3rem auto", padding: "2rem" }}>
-      <button onClick={() => navigate(-1)} style={{ padding: "0.5rem 1rem", marginBottom: "1.5rem", cursor: "pointer", background: "#f1f5f9", color: "#111827", border: "1px solid #cbd5e1" }}>
-        ← Back to Listings
-      </button>
+    <div style={{ maxWidth: "800px", margin: "3rem auto", padding: "0 1rem" }}>
+      <button onClick={() => navigate("/jobs")} style={{ marginBottom: "1.5rem", background: "#64748b" }}>← Back to Index</button>
+      
+      <div className="job-card" style={{ padding: "2rem" }}>
+        <h2>{job.title}</h2>
+        <h4 style={{ color: "#0d9488", margin: "0.5rem 0" }}>🏢 {job.company}</h4>
+        <p>📍 <strong>Location Node:</strong> {job.location || "Remote Deployment"}</p>
+        <p>💰 <strong>Compensation Bracket:</strong> {job.salary}</p>
+        
+        <hr style={{ margin: "1.5rem 0", opacity: 0.2 }} />
+        
+        <h3>Role Specification Log</h3>
+        <p style={{ lineHeight: "1.7" }}>{job.description}</p>
 
-      <div style={{ borderBottom: "2px solid #e2e8f0", paddingBottom: "1.5rem", marginBottom: "1.5rem" }}>
-        <h1 style={{ fontSize: "2.25rem", margin: "0 0 0.5rem 0" }}>{job.title}</h1>
-        <h3 style={{ color: "#7c3aed", margin: "0 0 0.25rem 0" }}>{job.company}</h3>
-        <p style={{ color: "#666", margin: "0" }}>📍 {job.location} | 💼 {job.type} | 💰 {job.salary}</p>
+        {job.requirements && (
+          <div style={{ margin: "1.5rem 0" }}>
+            <h3>Required Skills</h3>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+              {job.requirements.map((req, idx) => (
+                <span key={idx} style={{ background: "#0d9488", color: "white", padding: "0.35rem 0.75rem", borderRadius: "20px", fontSize: "0.85rem" }}>{req}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {currentUser?.role !== "Employer" && (
+          <button onClick={handleApply} style={{ width: "100%", padding: "1rem", fontSize: "1.1rem", marginTop: "1.5rem" }}>
+            Submit Placement Application
+          </button>
+        )}
       </div>
-
-      <div style={{ marginBottom: "2rem" }}>
-        <h2>Job Description</h2>
-        <p style={{ lineHeight: "1.6", color: "#334155" }}>{job.description}</p>
-      </div>
-
-      <div style={{ marginBottom: "2.5rem" }}>
-        <h2>Core Prerequisites</h2>
-        <ul style={{ paddingLeft: "1.25rem", lineHeight: "1.8" }}>
-          {Array.isArray(job.requirements) && job.requirements.length > 0 ? (
-            job.requirements.map((req, idx) => <li key={idx}>{req}</li>)
-          ) : (
-            <>
-              <li>Strong problem-solving capability</li>
-              <li>Familiarity with collaborative engineering systems</li>
-            </>
-          )}
-        </ul>
-      </div>
-
-      {currentUser?.role === "Employer" ? (
-        <p style={{ fontStyle: "italic", color: "#666", background: "#f1f5f9", padding: "1rem", borderRadius: "6px" }}>
-          ℹ️ You are currently viewing this vacancy as a Recruiter. Candidates will see an "Apply Now" submission trigger here.
-        </p>
-      ) : (
-        <button
-          onClick={handleApply}
-          disabled={applied}
-          style={{
-            width: "100%",
-            padding: "1rem",
-            fontSize: "1.1rem",
-            fontWeight: "bold",
-            cursor: applied ? "not-allowed" : "pointer",
-            background: applied ? "#10b981" : "#7c3aed",
-            color: "white",
-            borderRadius: "8px"
-          }}
-        >
-          {applied ? "✓ Application Transmitted Safely" : "Submit Application Now"}
-        </button>
-      )}
     </div>
   );
 }

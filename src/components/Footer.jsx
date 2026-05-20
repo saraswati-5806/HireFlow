@@ -5,7 +5,8 @@ import InfoModals from "./InfoModals";
 
 export default function Footer() {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const auth = useAuth();
+  const currentUser = auth ? auth.currentUser : null;
   const [activeModal, setActiveModal] = useState(null);
 
   return (
@@ -21,17 +22,55 @@ export default function Footer() {
           <h4>For Candidates</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.9rem" }}>
             <span onClick={() => navigate("/jobs")} style={{ cursor: "pointer" }}>🔍 Browse Jobs</span>
-            {/* 👤 Swapped link shortcut dynamically routes directly to Profile Viewer Modal */}
-            <span onClick={() => currentUser?.role === "Candidate" ? setActiveModal("profile") : navigate("/login")} style={{ cursor: "pointer" }}>👤 My Profile</span>
-            <span onClick={() => currentUser?.role === "Candidate" ? navigate("/my-applications") : navigate("/login")} style={{ cursor: "pointer" }}>📄 My Applications</span>
+            
+            <span
+              onClick={() =>
+                currentUser?.role === "candidate"
+                  ? setActiveModal("profile")
+                  : navigate("/login")
+              }
+              style={{ cursor: "pointer" }}
+            >
+              👤 My Profile
+            </span>
+
+            <span
+              onClick={() =>
+                currentUser?.role === "candidate"
+                  ? navigate("/my-applications")
+                  : navigate("/login")
+              }
+              style={{ cursor: "pointer" }}
+            >
+              📄 My Applications
+            </span>
           </div>
         </div>
 
         <div>
           <h4>For Employers</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.9rem" }}>
-            <span onClick={() => currentUser?.role === "Employer" ? navigate("/dashboard") : navigate("/login")} style={{ cursor: "pointer" }}>💼 Post a Job</span>
-            <span onClick={() => currentUser?.role === "Employer" ? navigate("/applicants") : navigate("/login")} style={{ cursor: "pointer" }}>🤝 Find Talent</span>
+            <span
+              onClick={() =>
+                currentUser?.role === "employer"
+                  ? navigate("/dashboard")
+                  : navigate("/login")
+              }
+              style={{ cursor: "pointer" }}
+            >
+              💼 Post a Job
+            </span>
+
+            <span
+              onClick={() =>
+                currentUser?.role === "employer"
+                  ? navigate("/applicants")
+                  : navigate("/login")
+              }
+              style={{ cursor: "pointer" }}
+            >
+              🤝 Find Talent
+            </span>
           </div>
         </div>
 
