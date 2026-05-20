@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
-import { getJobs } from "../utils/storage";
+// Import everything as a structural storage object to satisfy the bundler compilation
+import * as storage from "../utils/storage";
 import { Link } from "react-router-dom";
 import JobCard from "../components/JobCard";
 
 export default function Home() {
-  const [homeJobs, setHomeJobs] = useState([]); // Clear, unique state variable name
+  const [homeJobs, setHomeJobs] = useState([]); 
   const [loading, setLoading] = useState(true);
 
   // Fetch jobs safely from backend server database on page mount
   useEffect(() => {
     async function loadHomeData() {
       try {
-        const data = await getJobs();
-        // Fallback validation: ensure state gets an array even if backend is offline
+        // Use the wildcard object reference here safely
+        const data = await storage.getJobs();
         setHomeJobs(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Failed to parse home listings:", error);
@@ -53,7 +54,7 @@ export default function Home() {
         )}
 
         <div style={{ marginTop: "2.5rem" }}>
-          <Link to="/jobs" className="btn btn-primary" style={{ padding: "0.75rem 1.5rem", background: "#2563eb", color: "#fff", borderRadius: "5px", textDecoration: "none", fontWeight: "600" }}>
+          <Link to="/jobs" className="btn btn-primary" style={{ padding: "0.75rem 1.5rem", background: "#7c3aed", color: "#fff", borderRadius: "5px", textDecoration: "none", fontWeight: "600" }}>
             See All Openings
           </Link>
         </div>
