@@ -1,19 +1,18 @@
 const API_URL = "http://localhost:5000/api";
 
 // 1. DATA READ ENDPOINTS
-export async function getJobs() {
+async function getJobs() {
   try {
     const response = await fetch(`${API_URL}/jobs`);
     if (!response.ok) return [];
     const data = await response.json();
     return Array.isArray(data) ? data : [];
   } catch (error) {
-    console.error("Fetch error:", error);
     return [];
   }
 }
 
-export async function getJobById(id) {
+async function getJobById(id) {
   try {
     const response = await fetch(`${API_URL}/jobs/${id}`);
     return response.ok ? await response.json() : null;
@@ -23,7 +22,7 @@ export async function getJobById(id) {
 }
 
 // 2. DATA WRITE ENDPOINTS
-export async function addJob(jobData) {
+async function addJob(jobData) {
   try {
     const response = await fetch(`${API_URL}/jobs`, {
       method: "POST",
@@ -36,7 +35,7 @@ export async function addJob(jobData) {
   }
 }
 
-export async function addApplication(appData) {
+async function addApplication(appData) {
   try {
     const response = await fetch(`${API_URL}/applications`, {
       method: "POST",
@@ -49,7 +48,7 @@ export async function addApplication(appData) {
   }
 }
 
-export async function getEmployerDashboard(employerId) {
+async function getEmployerDashboard(employerId) {
   try {
     const response = await fetch(`${API_URL}/dashboard/employer/${employerId}`);
     return await response.json();
@@ -59,24 +58,43 @@ export async function getEmployerDashboard(employerId) {
 }
 
 // 3. AUTHENTICATION COMPATIBILITY STUBS
-export function setCurrentUser(user) {
+void function setCurrentUser(user) {
   localStorage.setItem("currentUser", JSON.stringify(user));
 }
 
-export function clearCurrentUser() {
+void function clearCurrentUser() {
   localStorage.removeItem("currentUser");
   localStorage.removeItem("hireflow_token");
 }
 
 // 4. BACKWARD COMPATIBILITY STUBS
-export async function hasApplied() { return false; }
-export function getUsers() { return []; }
-export function saveUsers() {}
-export function seedDemoData() {}
-export async function deleteJob() { return { success: true }; }
-export async function updateJob() { return { success: true }; }
-export async function getApplicationsByCandidate() { return []; }
-export async function getApplicationsByJob() { return []; }
+async function hasApplied() { return false; }
+function getUsers() { return []; }
+function saveUsers() {}
+function seedDemoData() {}
+async function deleteJob() { return { success: true }; }
+async function updateJob() { return { success: true }; }
+async function getApplicationsByCandidate() { return []; }
+async function getApplicationsByJob() { return []; }
+
+// 5. UNIFIED EXPORTS (This makes it impossible for Vite to throw a MISSING_EXPORT error)
+export {
+  getJobs,
+  getJobById,
+  addJob,
+  addApplication,
+  getEmployerDashboard,
+  setCurrentUser,
+  clearCurrentUser,
+  hasApplied,
+  getUsers,
+  saveUsers,
+  seedDemoData,
+  deleteJob,
+  updateJob,
+  getApplicationsByCandidate,
+  getApplicationsByJob
+};
 
 /* ==========================================================================
    🎨 INJECT CUSTOM COLOR PALETTE STYLES
