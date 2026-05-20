@@ -13,7 +13,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav style={{ background: "#e0f2fe", borderBottom: "2px solid #0d9488", padding: "1rem 2rem", display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: "sans-serif" }}>
+    <nav style={{ background: "#e0f2fe", borderBottom: "2px solid #0d9488", padding: "1rem 2rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
       <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#115e59", cursor: "pointer" }} onClick={() => navigate("/")}>
         Hire<span style={{ color: "#0d9488" }}>Flow</span>
       </div>
@@ -35,7 +35,7 @@ export default function Navbar() {
             <button onClick={handleLogoutClick} style={{ background: "#ef4444", color: "white", border: "none", padding: "0.5rem 1rem", borderRadius: "6px", fontWeight: "600", cursor: "pointer" }}>Logout</button>
           </>
         ) : (
-          /* 💼 EMPLOYER VIEW - EXACTLY 4 OPTIONS: Home, Employer Dashboard, Applicants, Logout */
+          /* 💼 EMPLOYER: Exactly 4 choices */
           <>
             <Link to="/dashboard" style={{ color: "#115e59", textDecoration: "none", fontWeight: "600" }}>Employer Dashboard</Link>
             <Link to="/applicants" style={{ color: "#115e59", textDecoration: "none", fontWeight: "600" }}>Applicants</Link>
