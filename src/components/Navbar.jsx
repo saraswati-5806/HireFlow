@@ -1,36 +1,44 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import * as storage from "../utils/storage"; // <-- Wildcard fix
+import * as storage from "../utils/storage";
 
 export default function Navbar() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    storage.clearCurrentUser(); // <-- Clean object call
-    navigate("/login");
+  const handleLogoutClick = () => {
+    storage.clearCurrentUser();
+    if (logout) logout();
+    navigate("/");
   };
 
   return (
-    <nav className="navbar" style={{ display: "flex", justifyContent: "space-between", padding: "1rem 2rem", alignItems: "center" }}>
-      <div className="navbar-brand">
-        <Link to="/" style={{ fontSize: "1.5rem", fontWeight: "bold", textDecoration: "none" }}>HireFlow</Link>
+    <nav style={{ background: "#e0f2fe", borderBottom: "2px solid #0d9488", padding: "1rem 2rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#115e59", cursor: "pointer" }} onClick={() => navigate("/")}>
+        Hire<span style={{ color: "#0d9488" }}>Flow</span>
       </div>
-      <div className="nav-links" style={{ display: "flex", gap: "1.5rem" }}>
-        <Link to="/jobs" style={{ textDecoration: "none" }}>Browse Jobs</Link>
-        {currentUser ? (
+      
+      <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+        <Link to="/" style={{ color: "#115e59", textDecoration: "none", fontWeight: "600" }}>Home</Link>
+        <Link to="/jobs" style={{ color: "#115e59", textDecoration: "none", fontWeight: "600" }}>Jobs</Link>
+
+        {!currentUser ? (
           <>
-            {currentUser.role === "Employer" && (
-              <Link to="/dashboard" style={{ textDecoration: "none" }}>Dashboard</Link>
-            )}
-            <span style={{ color: "#a78bfa", fontWeight: "600" }}>Welcome, {currentUser.name}</span>
-            <button onClick={handleLogout} className="btn" style={{ padding: "0.4rem 1rem", cursor: "pointer" }}>Logout</button>
+            <Link to="/login" style={{ color: "#115e59", textDecoration: "none", fontWeight: "600" }}>Login</Link>
+            <Link to="/signup" style={{ background: "#0d9488", color: "white", textDecoration: "none", padding: "0.5rem 1rem", borderRadius: "6px", fontWeight: "600" }}>Signup</Link>
+          </>
+        ) : currentUser.role === "Candidate" ? (
+          <>
+            <Link to="/dashboard" style={{ color: "#115e59", textDecoration: "none", fontWeight: "600" }}>Candidate Dashboard</Link>
+            <Link to="/my-applications" style={{ color: "#115e59", textDecoration: "none", fontWeight: "600" }}>My Applications</Link>
+            <button onClick={handleLogoutClick} style={{ background: "#ef4444", color: "white", border: "none", padding: "0.5rem 1rem", borderRadius: "6px", fontWeight: "600", cursor: "pointer" }}>Logout</button>
           </>
         ) : (
           <>
-            <Link to="/login" style={{ textDecoration: "none" }}>Login</Link>
-            <Link to="/signup" style={{ textDecoration: "none" }}>Signup</Link>
+            <Link to="/dashboard" style={{ color: "#115e59", textDecoration: "none", fontWeight: "600" }}>Employer Dashboard</Link>
+            <Link to="/jobs-posted" style={{ color: "#115e59", textDecoration: "none", fontWeight: "600" }}>Jobs Posted</Link>
+            <Link to="/applicants" style={{ color: "#115e59", textDecoration: "none", fontWeight: "600" }}>Applicants</Link>
+            <button onClick={handleLogoutClick} style={{ background: "#ef4444", color: "white", border: "none", padding: "0.5rem 1rem", borderRadius: "6px", fontWeight: "600", cursor: "pointer" }}>Logout</button>
           </>
         )}
       </div>
