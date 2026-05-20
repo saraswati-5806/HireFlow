@@ -4,7 +4,9 @@ import JobCard from "../components/JobCard";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
-  const jobs = getJobs().slice(0, 6);
+  {(Array.isArray(jobs) ? jobs : []).slice(0, 4).map((job) => (
+  <JobCard key={job.id} job={job} />
+  ))}
 
   // Simulate an API / Database fetch delay
   useEffect(() => {
