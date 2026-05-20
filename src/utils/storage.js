@@ -1,134 +1,131 @@
 const API_URL = "http://localhost:5000/api";
 
-// Helper function to bundle headers with user authentication token
-function getAuthHeaders() {
-  const token = localStorage.getItem("hireflow_token");
-  return {
-    "Content-Type": "application/json",
-    "Authorization": token ? `Bearer ${token}` : ""
-  };
-}
-
-/* ==========================================================================
-   🔐 AUTHENTICATION INTEGRATION FUNCTIONS
-   ========================================================================== */
-
-// 1. LOGIN API CALL
-export async function loginUser(email, password) {
-  const response = await fetch(`${API_URL}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
-  
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "Login failed");
-  
-  // Store the session token securely in the browser environment
-  localStorage.setItem("hireflow_token", data.token);
-  localStorage.setItem("currentUser", JSON.stringify(data.user));
-  return data.user;
-}
-
-// 2. SIGNUP API CALL
-export async function signupUser(userData) {
-  const response = await fetch(`${API_URL}/auth/signup`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(userData)
-  });
-  
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "Signup failed");
-  
-  localStorage.setItem("hireflow_token", data.token);
-  localStorage.setItem("currentUser", JSON.stringify(data.user));
-  return data.user;
-}
-
-// 3. LOGOUT CLEANUP
-export function logoutUser() {
-  localStorage.removeItem("hireflow_token");
-  localStorage.removeItem("currentUser");
-}
-
-// 4. RETRIEVE PERSISTENT PROFILE SESSION
-export function getCurrentUser() {
-  return JSON.parse(localStorage.getItem("currentUser"));
-}
-
-/* ==========================================================================
-   💼 JOBS INTEGRATION FUNCTIONS
-   ========================================================================== */
-
-// 1. FETCH ALL JOBS FROM SQLITE (With safety defaults to prevent .slice() crashes)
+// Live Fetch Readers
 export async function getJobs() {
   try {
     const response = await fetch(`${API_URL}/jobs`);
-    if (!response.ok) throw new Error("Could not fetch jobs dataset.");
     const data = await response.json();
-    
-    // Ensure data is strictly a valid array before returning to the UI components
     return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error("Backend fetch failed, falling back to empty array:", error);
-    return []; // Safe fallback prevents frontend component crashes
-  }
+  } catch { return []; }
 }
 
-// 2. FETCH SPECIFIC SINGLE JOB DETAILS
 export async function getJobById(id) {
   try {
     const response = await fetch(`${API_URL}/jobs/${id}`);
-    if (!response.ok) throw new Error("Job listing not found.");
-    return await response.json();
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
+    return response.ok ? await response.json() : null;
+  } catch { return null; }
 }
+
+// Live DB Write Operations
+export async function addJob(jobData) {
+  try {
+    const response = await fetch(`${API_URL}/jobs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(jobData),
+    });
+    return await response.json();
+  } catch (error) { console.error(error); }
+}
+
+export async function addApplication(appData) {
+  try {
+    const response = await fetch(`${API_URL}/applications`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(appData),
+    });
+    return await response.json();
+  } catch (error) { console.error(error); }
+}
+
+// Dashboard Live Connector
+export async function getEmployerDashboard(employerId) {
+  try {
+    const response = await fetch(`${API_URL}/dashboard/employer/${employerId}`);
+    return await response.json();
+  } catch { return { totalJobs: 0, totalApplications: 0, applications: [] }; }
+}
+
+// Backward Compatibility Stubs
+export async function hasApplied() { return false; }
+export function getUsers() { return []; }
+export function saveUsers() {}
+export function seedDemoData() {}
+export async function deleteJob() { return { success: true }; }
+export async function updateJob() { return { success: true }; }
+export async function getApplicationsByCandidate() { return []; }
+export async function getApplicationsByJob() { return []; }
 
 /* ==========================================================================
-   🔄 BACKWARD COMPATIBILITY EXPORTS FOR PRODUCTION BUILD
+   🎨 INJECT PURPLE, CHARCOAL & ICE NEON CUSTOM COLOR PALETTE STYLES
    ========================================================================== */
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
+  style.innerHTML = `
+    :root {
+      --primary-color: #7c3aed !important; /* Premium Vibrant Purple */
+      --primary-dark: #6d28d9 !important;
+      --bg-dark: #111827 !important;       /* Dark Navy Charcoal Nav */
+      --bg-light: #f8fafc !important;      /* Ice Gray Background */
+      --text-dark: #0f172a !important;     /* High Contrast Text */
+      --accent: #a78bfa !important;        /* Purple Muted Tint */
+    }
+    
+    body {
+      background-color: var(--bg-light) !important;
+      color: var(--text-dark) !important;
+      font-family: 'Inter', sans-serif !important;
+    }
 
-export async function addApplication(app) {
-  console.log("Mock application saved locally:", app);
-  return { success: true };
-}
+    navbar, .navbar, nav {
+      background-color: var(--bg-dark) !important;
+      border-bottom: 3px solid var(--primary-color) !important;
+    }
 
-export async function hasApplied(jobId, candidateId) {
-  return false; 
-}
+    nav a, .navbar-brand, .nav-link {
+      color: #f1f5f9 !important;
+    }
 
-export function getUsers() {
-  return []; 
-}
+    nav a:hover {
+      color: var(--accent) !important;
+    }
 
-export function saveUsers(users) {}
+    .card, .job-card, .container {
+      background: #ffffff !important;
+      border-radius: 12px !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+    }
 
-export async function addJob(jobData) {
-  return { ...jobData, id: 'job_' + Math.random().toString(36).substr(2, 9) };
-}
+    .btn-primary, button, input[type="submit"], .btn {
+      background-color: var(--primary-color) !important;
+      border: none !important;
+      color: white !important;
+      border-radius: 6px !important;
+      transition: all 0.2s ease !important;
+    }
 
-export async function deleteJob(id) {
-  return { success: true };
-}
+    .btn-primary:hover, button:hover {
+      background-color: var(--primary-dark) !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3) !important;
+    }
 
-export async function updateJob(id, updatedData) {
-  return { id, ...updatedData };
-}
+    input, select, textarea {
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 6px !important;
+      padding: 0.6rem !important;
+    }
 
-// Ensure these return clean arrays so UI dashboards calling .slice() or .map() stay stable
-export async function getApplicationsByCandidate(candidateId) {
-  return []; 
-}
+    input:focus, select:focus {
+      outline: 2px solid var(--primary-color) !important;
+    }
 
-export async function getApplicationsByJob(jobId) {
-  return [];
-}
-
-// 5. Final fallback to satisfy App.jsx mounting logic
-export function seedDemoData() {
-  // Intentionally blank! SQLite handles its own seeding on server boot up now.
+    h1, h2, h3 {
+      color: var(--bg-dark) !important;
+      font-weight: 700 !important;
+    }
+  `;
+  document.head.appendChild(style);
 }
