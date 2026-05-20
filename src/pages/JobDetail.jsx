@@ -1,120 +1,100 @@
-import { useParams } from "react-router-dom";
-import { useState } from "react";
-import { toast } from "react-toastify";
-
-import {
-  getJobById,
-  addApplication,
-  hasApplied,
-} from "../utils/storage";
-
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import * as storage from "../utils/storage"; // <-- Standardized Wildcard Fix
 
 export default function JobDetail() {
   const { id } = useParams();
-  const job = getJobById(id);
+  const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const [resumeText, setResumeText] = useState("");
-  const [fileName, setFileName] = useState(""); // State for frontend file preview
+  
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [applied, setApplied] = useState(false);
 
-  function handleFileChange(e) {
-    const file = e.target.files[0];
-    if (file) {
-      setFileName(file.name); // Store the file name for the frontend preview
-      toast.info(`Selected file: ${file.name}`);
+  useEffect(() => {
+    async function loadJobDetails() {
+      const data = await storage.getJobById(id);
+      setJob(data);
+      setLoading(false);
     }
-  }
+    loadJobDetails();
+  }, [id]);
 
-  function handleApply() {
+  const handleApply = async () => {
     if (!currentUser) {
-      toast.error("Please login first");
+      alert("Please log in to submit your job application.");
+      navigate("/login");
       return;
     }
 
-    if (currentUser.role !== "candidate") {
-      toast.error("Only candidates can apply");
-      return;
-    }
-
-    if (hasApplied(job.id, currentUser.id)) {
-      toast.warning("You have already applied for this job");
-      return;
-    }
-
-    // Optional validation: Ensure they uploaded a file or filled the box
-    if (!fileName && !resumeText.trim()) {
-      toast.error("Please provide a text cover letter or upload a resume file.");
-      return;
-    }
-
-    const application = {
-      id: Date.now().toString(),
+    const applicationPayload = {
       jobId: job.id,
-      jobTitle: job.title,
-      company: job.company,
       candidateId: currentUser.id,
       candidateName: currentUser.name,
-      candidateEmail: currentUser.email,
-      resumeText,
-      attachedFileName: fileName || "No file attached", // Mock save to your localStorage record
-      appliedDate: new Date().toISOString(),
-      status: "Applied",
+      candidateEmail: currentUser.email
     };
 
-    addApplication(application);
-    toast.success("Application Submitted Successfully");
-    
-    // Clear form inputs on success
-    setResumeText("");
-    setFileName("");
-  }
+    await storage.addApplication(applicationPayload);
+    setApplied(true);
+    alert(`Success! Your application for ${job.title} has been logged in the backend database.`);
+  };
 
-  if (!job) {
-    return <div className="container">Job not found</div>;
-  }
+  if (loading) return <div style={{ padding: "3rem", textAlign: "center" }}>Loading position metrics...</div>;
+  if (!job) return <div style={{ padding: "3rem", textAlign: "center" }}>Job position not found.</div>;
 
   return (
-    <div className="container">
-      <h1>{job.title}</h1>
-      <h3>{job.company}</h3>
-      <p>{job.location}</p>
-      <p>{job.salary}</p>
-      <p>{job.description}</p>
+    <div className="container" style={{ maxWidth: "800px", margin: "3rem auto", padding: "2rem" }}>
+      <button onClick={() => navigate(-1)} style={{ padding: "0.5rem 1rem", marginBottom: "1.5rem", cursor: "pointer", background: "#f1f5f9", color: "#111827", border: "1px solid #cbd5e1" }}>
+        ← Back to Listings
+      </button>
 
-      <div className="requirements">
-        {job.requirements?.map((req, index) => (
-          <span key={index}>{req}</span>
-        ))}
+      <div style={{ borderBottom: "2px solid #e2e8f0", paddingBottom: "1.5rem", marginBottom: "1.5rem" }}>
+        <h1 style={{ fontSize: "2.25rem", margin: "0 0 0.5rem 0" }}>{job.title}</h1>
+        <h3 style={{ color: "#7c3aed", margin: "0 0 0.25rem 0" }}>{job.company}</h3>
+        <p style={{ color: "#666", margin: "0" }}>📍 {job.location} | 💼 {job.type} | 💰 {job.salary}</p>
       </div>
 
-      {currentUser?.role === "candidate" && (
-        <div className="apply-box" style={{ marginTop: "30px", display: "flex", flexDirection: "column", gap: "15px" }}>
-          
-          <textarea
-            placeholder="Write Resume / Cover Letter"
-            value={resumeText}
-            onChange={(e) => setResumeText(e.target.value)}
-          />
+      <div style={{ marginBottom: "2rem" }}>
+        <h2>Job Description</h2>
+        <p style={{ lineHeight: "1.6", color: "#334155" }}>{job.description}</p>
+      </div>
 
-          {/* Added File Input Field */}
-          <div className="file-upload-section" style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-            <label style={{ fontWeight: "bold", fontSize: "14px" }}>Upload Resume File (PDF/Doc):</label>
-            <input 
-              type="file" 
-              accept=".pdf,.doc,.docx"
-              onChange={handleFileChange} 
-            />
-            {fileName && (
-              <p style={{ fontSize: "13px", color: "#27AE60", marginTop: "2px" }}>
-                📎 Ready to upload: <strong>{fileName}</strong>
-              </p>
-            )}
-          </div>
+      <div style={{ marginBottom: "2.5rem" }}>
+        <h2>Core Prerequisites</h2>
+        <ul style={{ paddingLeft: "1.25rem", lineHeight: "1.8" }}>
+          {Array.isArray(job.requirements) && job.requirements.length > 0 ? (
+            job.requirements.map((req, idx) => <li key={idx}>{req}</li>)
+          ) : (
+            <>
+              <li>Strong problem-solving capability</li>
+              <li>Familiarity with collaborative engineering systems</li>
+            </>
+          )}
+        </ul>
+      </div>
 
-          <button onClick={handleApply} style={{ marginTop: "10px" }}>
-            Apply Now
-          </button>
-        </div>
+      {currentUser?.role === "Employer" ? (
+        <p style={{ fontStyle: "italic", color: "#666", background: "#f1f5f9", padding: "1rem", borderRadius: "6px" }}>
+          ℹ️ You are currently viewing this vacancy as a Recruiter. Candidates will see an "Apply Now" submission trigger here.
+        </p>
+      ) : (
+        <button
+          onClick={handleApply}
+          disabled={applied}
+          style={{
+            width: "100%",
+            padding: "1rem",
+            fontSize: "1.1rem",
+            fontWeight: "bold",
+            cursor: applied ? "not-allowed" : "pointer",
+            background: applied ? "#10b981" : "#7c3aed",
+            color: "white",
+            borderRadius: "8px"
+          }}
+        >
+          {applied ? "✓ Application Transmitted Safely" : "Submit Application Now"}
+        </button>
       )}
     </div>
   );
