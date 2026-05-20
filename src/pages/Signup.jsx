@@ -1,105 +1,59 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-
-import { getUsers, saveUsers } from "../utils/storage";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Signup() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("Candidate");
+  const [error, setError] = useState("");
+  const { signup } = useAuth();
   const navigate = useNavigate();
-  const { login } = useAuth();
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "candidate",
-    company: "",
-  });
-
-  function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const users = getUsers();
-
-    // Check if a user with the same email already exists
-    const userExists = users.some(
-      (u) => u.email.toLowerCase() === form.email.toLowerCase()
-    );
-
-    if (userExists) {
-      toast.error("User Exists with this email address");
-      return;
+    setError("");
+    const result = await signup(name, email, password, role);
+    if (result.success) {
+      navigate("/");
+    } else {
+      setError(result.error || "Registration failed. Email might already be taken.");
     }
-
-    const newUser = {
-      id: Date.now().toString(),
-      ...form,
-    };
-
-    users.push(newUser);
-    saveUsers(users);
-    login(newUser);
-
-    toast.success("Account Created Successfully!");
-    navigate("/dashboard");
-  }
+  };
 
   return (
-    <form className="form" onSubmit={handleSubmit}>
-      <h2>Signup</h2>
-
-      <input
-        placeholder="Name"
-        value={form.name}
-        onChange={(e) =>
-          setForm({ ...form, name: e.target.value })
-        }
-        required
-      />
-
-      <input
-        type="email"
-        placeholder="Email"
-        value={form.email}
-        onChange={(e) =>
-          setForm({ ...form, email: e.target.value })
-        }
-        required
-      />
-
-      <input
-        type="password"
-        placeholder="Password"
-        value={form.password}
-        onChange={(e) =>
-          setForm({ ...form, password: e.target.value })
-        }
-        required
-      />
-
-      <select
-        value={form.role}
-        onChange={(e) =>
-          setForm({ ...form, role: e.target.value, company: "" })
-        }
-      >
-        <option value="candidate">Candidate</option>
-        <option value="employer">Employer</option>
-      </select>
-
-      {form.role === "employer" && (
-        <input
-          placeholder="Company Name"
-          value={form.company}
-          onChange={(e) =>
-            setForm({ ...form, company: e.target.value })
-          }
-          required
-        />
-      )}
-
-      <button type="submit">Signup</button>
-    </form>
+    <div className="container" style={{ maxWidth: "450px", margin: "4rem auto", padding: "2.5rem" }}>
+      <h2 style={{ textAlign: "center", marginBottom: "1.5rem" }}>Create Your Account</h2>
+      {error && <p style={{ color: "#ef4444", background: "#fee2e2", padding: "0.75rem", borderRadius: "6px", fontSize: "0.9rem" }}>{error}</p>}
+      
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <label style={{ fontWeight: "600" }}>Full Name</label>
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <label style={{ fontWeight: "600" }}>Email Address</label>
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <label style={{ fontWeight: "600" }}>Password</label>
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <label style={{ fontWeight: "600" }}>Account Type</label>
+          <select value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="Candidate">Candidate (Looking for work)</option>
+            <option value="Employer">Employer (Hiring candidates)</option>
+          </select>
+        </div>
+        <button type="submit" style={{ padding: "0.75rem", fontWeight: "bold", fontSize: "1rem", marginTop: "0.5rem", cursor: "pointer" }}>
+          Register Account
+        </button>
+      </form>
+      <p style={{ textAlign: "center", marginTop: "1.5rem", marginBottom: "0" }}>
+        Already have an account? <Link to="/login" style={{ color: "#7c3aed", fontWeight: "600", textDecoration: "none" }}>Log in here</Link>
+      </p>
+    </div>
   );
 }
