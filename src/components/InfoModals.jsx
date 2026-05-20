@@ -1,25 +1,17 @@
 export default function InfoModals({ type, onClose }) {
   const getContent = () => {
     switch (type) {
-      case "advice":
+      case "recruiters":
         return {
-          title: "Career Advice Portal",
+          title: "Find Recruiters Directory",
           body: (
             <div>
-              <p><strong>1. Continuous Skill Accumulation:</strong> Focus on refining technical fundamentals in Software Engineering and system-level architectures daily.</p>
-              <p><strong>2. Network Orchestration:</strong> Engage with active open-source ecosystems and maintain high visibility repositories on GitHub.</p>
-              <p><strong>3. Mock Evaluation Runs:</strong> Dedicate routine cycles to timed programmatic challenges to sharpen runtime efficiency logic.</p>
-            </div>
-          )
-        };
-      case "tips":
-        return {
-          title: "Resume Refinement Guidelines",
-          body: (
-            <div>
-              <p>• <strong>Quantify Output Metrics:</strong> Replace basic objective statements with structural production metrics (e.g., 'Optimized state queries by 40%').</p>
-              <p>• <strong>Prioritize Tech Stack Layouts:</strong> Dedicate an upper-tier indexing grid for programming languages and modeling standards like UML.</p>
-              <p>• <strong>Keep It Monolithic:</strong> Maintain a single-page layout hierarchy containing active hyperlinks directly targeting your portfolio.</p>
+              <p>Connect with active corporate talent acquisition managers looking for software engineering talent:</p>
+              <ul>
+                <li><strong>Acme Corporate Tech:</strong> Specialized in cloud systems architecture.</li>
+                <li><strong>NexGen Systems Group:</strong> Focusing on React frontend engineering loops.</li>
+                <li><strong>Global Data Nodes:</strong> Core backend infrastructure placement openings.</li>
+              </ul>
             </div>
           )
         };

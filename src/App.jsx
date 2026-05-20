@@ -1,64 +1,41 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom";
-
-import { AuthProvider, useAuth } from "./context/AuthContext";
-
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import ProtectedRoute from "./components/ProtectedRoute";
-
-import Admin from "./pages/Admin";
 import Home from "./pages/Home";
 import Jobs from "./pages/Jobs";
-import JobDetail from "./pages/JobDetail";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import Applicants from "./pages/Applicants";
+import MyApplications from "./pages/MyApplications";
+import { AuthProvider } from "./context/AuthContext";
 
-import { seedDemoData } from "./utils/storage";
-<Route path="/admin" element={<Admin />} />
-seedDemoData();
-
-// 1. Create an inner component to safely access useAuth()
-function AppContent() {
-  const { darkMode } = useAuth();
-
-  return (
-    <div className={darkMode ? "dark" : ""}>
-      <BrowserRouter>
-        <Navbar />
-
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/jobs" element={<Jobs />} />
-          <Route path="/jobs/:id" element={<JobDetail />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-
-        <Footer />
-      </BrowserRouter>
-    </div>
-  );
-}
-
-// 2. Keep App as the main export, initializing the Provider wrapper
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <Router>
+        {/* 💡 THE FOOTER PROTECTION WRAPPER CONTAINER */}
+        <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+          
+          <Navbar />
+          
+          {/* Main page content auto-expands to push footer down */}
+          <main style={{ flex: 1 }}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/jobs" element={<Jobs />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/applicants" element={<Applicants />} />
+              <Route path="/my-applications" element={<MyApplications />} />
+            </Routes>
+          </main>
+          
+          <Footer />
+          
+        </div>
+      </Router>
     </AuthProvider>
   );
 }
