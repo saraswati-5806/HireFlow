@@ -1,18 +1,22 @@
+import { useAuth } from "../context/AuthContext";
+
 export default function InfoModals({ type, onClose }) {
+  const { currentUser } = useAuth();
+
   const getContent = () => {
     switch (type) {
-      case "recruiters":
+      case "profile":
         return {
-          title: "Find Recruiters Directory",
-          body: (
+          title: "My Profile Details",
+          body: currentUser ? (
             <div>
-              <p>Connect with active corporate talent acquisition pipelines looking for engineering talent:</p>
-              <ul>
-                <li><strong>Acme Corporate Tech:</strong> Cloud infrastructure development loops.</li>
-                <li><strong>NexGen Systems Group:</strong> Interactive web frontend engineering pipelines.</li>
-                <li><strong>Global Data Nodes:</strong> Core system optimizations and data structures.</li>
-              </ul>
+              <p style={{ margin: "0.5rem 0" }}><strong>Full Name:</strong> {currentUser.name || "N/A"}</p>
+              <p style={{ margin: "0.5rem 0" }}><strong>Email Address:</strong> {currentUser.email || "N/A"}</p>
+              <p style={{ margin: "0.5rem 0" }}><strong>Assigned System Role:</strong> {currentUser.role}</p>
+              <p style={{ margin: "0.5rem 0" }}><strong>Account Status:</strong> Active Local Stream Member</p>
             </div>
+          ) : (
+            <p>No active user profiles found. Please sign in to verify attributes.</p>
           )
         };
       case "about":

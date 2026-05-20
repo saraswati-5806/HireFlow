@@ -18,21 +18,30 @@ export default function Footer() {
     else { alert("Employer status required."); navigate("/login"); }
   };
 
+  const handleProfileRedirect = () => {
+    if (currentUser?.role === "Candidate") {
+      setActiveModal("profile");
+    } else {
+      alert("Candidate profile access only. Please log in as a Candidate.");
+      navigate("/login");
+    }
+  };
+
   const handleCandidateRedirect = (path) => {
     if (currentUser?.role === "Candidate") navigate(path);
     else { alert("Candidate status required."); navigate("/login"); }
   };
 
   return (
-    <footer style={{ background: "#0f172a", color: "#94a3b8", paddingTop: "3.5rem", paddingBottom: "2rem", borderTop: "4px solid #0d9488", fontFamily: "sans-serif", width: "100%" }}>
+    <footer style={{ background: "#0f172a", color: "#94a3b8", paddingTop: "3.5rem", paddingBottom: "2rem", borderTop: "4px solid #0d9488", fontFamily: "sans-serif", width: "100%", marginTop: "auto" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "2.5rem" }}>
         
-        {/* COL 1: LOGO & REAL SVG BRAND ICONS */}
+        {/* COL 1: REAL SVG BRAND ICONS */}
         <div>
           <h3 style={{ color: "#ffffff", margin: "0 0 1rem 0", fontSize: "1.4rem" }}>Hire<span style={{ color: "#0d9488" }}>Flow</span></h3>
           <p style={{ fontSize: "0.9rem", lineHeight: "1.6", marginBottom: "1.5rem" }}>The definitive frontend pipeline mapping elite student engineers directly onto modern corporate talent nodes.</p>
           <div style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>
-            <a href="mailto:support@hireflow.edu" title="Email">
+            <a href="mailto:support@hireflow.edu" title="Gmail">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" fill="#EA4335"/><path d="M22 6V9L12 15L2 9V6L12 12L22 6Z" fill="#C5221F"/><path d="M2 6V18C2 19.1 2.9 20 4 20H6V9L2 6Z" fill="#F4B400"/><path d="M22 6V18C22 19.1 21.1 20 20 20H18V9L22 6Z" fill="#4285F4"/></svg>
             </a>
             <a href="https://linkedin.com" target="_blank" rel="noreferrer" title="LinkedIn">
@@ -44,17 +53,17 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* COL 2: CANDIDATE LINK CHANNELS */}
+        {/* COL 2: SWAPPED LINK MODAL */}
         <div>
           <h4 style={{ color: "#ffffff", margin: "0 0 1.25rem 0", fontSize: "1.1rem" }}>For Candidates</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.95rem" }}>
             <span onClick={() => navigate("/jobs")} style={{ cursor: "pointer", color: "#38bdf8" }}>🔍 Browse Jobs</span>
-            <span onClick={() => setActiveModal("recruiters")} style={{ cursor: "pointer", color: "#38bdf8" }}>🏢 Find Recruiters</span>
+            <span onClick={handleProfileRedirect} style={{ cursor: "pointer", color: "#38bdf8" }}>👤 My Profile</span>
             <span onClick={() => handleCandidateRedirect("/my-applications")} style={{ cursor: "pointer", color: "#38bdf8" }}>📄 My Applications</span>
           </div>
         </div>
 
-        {/* COL 3: RECRUITER ACTIONS */}
+        {/* COL 3: EMPLOYER SHORTCUTS */}
         <div>
           <h4 style={{ color: "#ffffff", margin: "0 0 1.25rem 0", fontSize: "1.1rem" }}>For Employers</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.95rem" }}>
@@ -64,7 +73,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* COL 4: COMPANY INFO NODES */}
+        {/* COL 4: COMPANY INFO */}
         <div>
           <h4 style={{ color: "#ffffff", margin: "0 0 1.25rem 0", fontSize: "1.1rem" }}>Company</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.95rem" }}>
