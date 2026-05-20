@@ -130,10 +130,18 @@ textarea {
 
 
 
-/* 🌓 DARK MODE PARAMETERS */
+/* ==========================================
+   🌓 FLUID DARK/LIGHT TRANSITION STYLING
+   ========================================== */
+
+/* Add transition parameters to the root elements */
+body, div, nav, footer, main, .navbar, .footer, .job-card, .form {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
 .dark {
   background: #121212;
-  color: #f8fafc;
+  color: #ffffff;
 }
 
 .dark .job-card,
@@ -145,17 +153,17 @@ textarea {
   border-color: #334155;
 }
 
-/* Ensure form inputs remain legible in dark mode */
+/* Legibility fixes for text inputs inside darker profiles */
 .dark input, 
 .dark select, 
 .dark textarea {
   background: #2d3748;
-  color: white;
+  color: #ffffff;
   border: 1px solid #4a5568;
 }
 
-.dark a {
-  color: #38bdf8;
+.dark button:not(.logout-btn) {
+  border-color: #4a5568;
 }
 
 .stats-grid {

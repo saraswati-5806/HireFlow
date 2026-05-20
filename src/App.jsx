@@ -8,7 +8,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
-// 🌟 FIX: Separating the container ensures useAuth() executes safely inside the AuthProvider tree!
+// 🌟 Safe inner wrapper that reads context variables cleanly without crashing
 function AppContent() {
   const { darkMode } = useAuth();
 
@@ -24,7 +24,7 @@ function AppContent() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
           
-          {/* Quick link fallbacks */}
+          {/* Fallback routes */}
           <Route path="/applicants" element={<Dashboard />} />
           <Route path="/jobs-posted" element={<Dashboard />} />
           <Route path="/my-applications" element={<Dashboard />} />
@@ -36,6 +36,7 @@ function AppContent() {
   );
 }
 
+// 🛡️ The master component only sets up providers, it doesn't call useAuth() directly
 export default function App() {
   return (
     <AuthProvider>
