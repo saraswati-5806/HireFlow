@@ -21,7 +21,7 @@ export default function Footer() {
           <h4>For Candidates</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.9rem" }}>
             <span onClick={() => navigate("/jobs")} style={{ cursor: "pointer" }}>🔍 Browse Jobs</span>
-            {/* 👤 My Profile displays user registration data inside a modal */}
+            {/* 👤 Swapped link shortcut dynamically routes directly to Profile Viewer Modal */}
             <span onClick={() => currentUser?.role === "Candidate" ? setActiveModal("profile") : navigate("/login")} style={{ cursor: "pointer" }}>👤 My Profile</span>
             <span onClick={() => currentUser?.role === "Candidate" ? navigate("/my-applications") : navigate("/login")} style={{ cursor: "pointer" }}>📄 My Applications</span>
           </div>

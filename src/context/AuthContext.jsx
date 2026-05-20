@@ -12,7 +12,6 @@ export function AuthProvider({ children }) {
     storage.setCurrentUser(currentUser);
   }, [currentUser]);
 
-  // Sync dark mode state with localStorage configuration
   useEffect(() => {
     if (darkMode) {
       localStorage.setItem("theme", "dark");
@@ -37,8 +36,8 @@ export function AuthProvider({ children }) {
         currentUser,
         login,
         logout,
-        darkMode, // 🌟 Added to provider
-        setDarkMode // 🌟 Added to provider
+        darkMode, // 🌟 added to provider
+        setDarkMode // 🌟 added to provider
       }}
     >
       {children}

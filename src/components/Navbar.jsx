@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
-  const { currentUser, logout, darkMode, setDarkMode } = useAuth(); // 🌟 Import dark mode state
+  const { currentUser, logout, darkMode, setDarkMode } = useAuth();
 
   return (
     <nav className="navbar">
@@ -22,15 +22,14 @@ export default function Navbar() {
         {currentUser && (
           <>
             <Link to="/dashboard">Dashboard</Link>
-            <button onClick={logout} className="logout-btn">Logout</button>
+            <button onClick={logout}>Logout</button>
           </>
         )}
 
-        {/* 🌓 Dark Mode Toggle Button */}
-        <button 
+        {/* 🌓 Dark Mode Toggler */}
+        <button
           onClick={() => setDarkMode(!darkMode)}
-          style={{ background: "transparent", border: "none", fontSize: "1.2rem", cursor: "pointer", marginLeft: "0.5rem" }}
-          title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          style={{ background: "transparent", border: "none", fontSize: "1.2rem", cursor: "pointer", padding: "0 0.5rem" }}
         >
           {darkMode ? "☀️" : "🌙"}
         </button>

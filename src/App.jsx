@@ -8,9 +8,9 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
-// Inner shell component allows reading context values below AuthProvider safely
+// 🌟 FIX: Separating the container ensures useAuth() executes safely inside the AuthProvider tree!
 function AppContent() {
-  const { darkMode } = useAuth(); // 🌟 Read theme state safely inside provider node
+  const { darkMode } = useAuth();
 
   return (
     <div className={darkMode ? "dark" : ""} style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -24,7 +24,7 @@ function AppContent() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
           
-          {/* Quick links to match existing configurations */}
+          {/* Quick link fallbacks */}
           <Route path="/applicants" element={<Dashboard />} />
           <Route path="/jobs-posted" element={<Dashboard />} />
           <Route path="/my-applications" element={<Dashboard />} />
