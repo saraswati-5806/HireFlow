@@ -2,7 +2,13 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
-  const { currentUser, logout, darkMode, setDarkMode } = useAuth();
+  const auth = useAuth();
+  
+  // Safe default values if context returns null unexpectedly
+  const currentUser = auth ? auth.currentUser : null;
+  const logout = auth ? auth.logout : () => {};
+  const darkMode = auth ? auth.darkMode : false;
+  const setDarkMode = auth ? auth.setDarkMode : () => {};
 
   return (
     <nav className="navbar">
@@ -22,7 +28,7 @@ export default function Navbar() {
         {currentUser && (
           <>
             <Link to="/dashboard">Dashboard</Link>
-            <button onClick={logout}>Logout</button>
+            <button onClick={logout} className="logout-btn">Logout</button>
           </>
         )}
 

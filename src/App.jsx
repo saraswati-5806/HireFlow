@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -10,7 +10,10 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 
 // 🌟 Safe inner wrapper that reads context variables cleanly without crashing
 function AppContent() {
-  const { darkMode } = useAuth();
+  const auth = useAuth();
+  
+  // Dynamic safe fallback if context is initializing
+  const darkMode = auth ? auth.darkMode : false;
 
   return (
     <div className={darkMode ? "dark" : ""} style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -36,13 +39,11 @@ function AppContent() {
   );
 }
 
-// 🛡️ The master component only sets up providers, it doesn't call useAuth() directly
+// 🛡️ Master configuration provider
 export default function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <AppContent />
     </AuthProvider>
   );
 }
