@@ -1,161 +1,114 @@
-import { useState } from "react";
-import { toast } from "react-toastify";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-
-import {
-  getJobs,
-  addJob,
-  deleteJob,
-  updateJob,
-  getApplicationsByCandidate,
-  getApplicationsByJob, // Imported this to support your new stats logic
-} from "../utils/storage";
-
-import JobForm from "../components/JobForm";
-import ApplicantList from "../components/ApplicantList";
+import * as storage from "../utils/storage"; // <-- Wildcard fix
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
-  const [editingJob, setEditingJob] = useState(null);
-  
-  // Use local state to force immediate component re-render without refreshing the page
-  const [jobsList, setJobsList] = useState(getJobs());
+  const [metrics, setMetrics] = useState({ totalJobs: 0, totalApplications: 0, applications: [] });
+  const [loading, setLoading] = useState(true);
 
-  // EMPLOYER JOBS
-  const employerJobs = jobsList.filter(
-    (job) => job.employerId === currentUser.id
-  );
+  // Form Field States
+  const [title, setTitle] = useState("");
+  const [company, setCompany] = useState("");
+  const [location, setLocation] = useState("");
+  const [type, setType] = useState("Full Time");
+  const [salary, setSalary] = useState("");
+  const [description, setDescription] = useState("");
 
-  // CANDIDATE APPLICATIONS
-  const applications = getApplicationsByCandidate(currentUser.id);
+  useEffect(() => {
+    async function loadDashboardData() {
+      if (currentUser?.id) {
+        const data = await storage.getEmployerDashboard(currentUser.id);
+        setMetrics(data || { totalJobs: 0, totalApplications: 0, applications: [] });
+      }
+      setLoading(false);
+    }
+    loadDashboardData();
+  }, [currentUser]);
 
-  function handleAddJob(formData) {
+  const handlePostJob = async (e) => {
+    e.preventDefault();
     const newJob = {
-      id: Date.now().toString(),
-      title: formData.title,
-      company: currentUser.company || "Your Company",
-      location: formData.location,
-      type: formData.type,
-      salary: formData.salary,
-      description: formData.description,
-      requirements: typeof formData.requirements === "string" 
-        ? formData.requirements.split(",").map(r => r.trim()) 
-        : formData.requirements,
-      employerId: currentUser.id,
-      postedDate: new Date().toISOString(),
+      title, company, location, type, salary, description,
+      requirements: ["React", "Node.js"], // Automated default requirements array
+      postedBy: currentUser.id
     };
 
-    addJob(newJob);
-    setJobsList(getJobs()); // Update state to display job instantly
-    toast.success("Job Added Successfully");
-  }
+    await storage.addJob(newJob);
+    alert("Job successfully posted to live board!");
+    
+    // Refresh view data rows
+    const data = await storage.getEmployerDashboard(currentUser.id);
+    setMetrics(data);
+    
+    // Reset Form
+    setTitle(""); setCompany(""); setLocation(""); setSalary(""); setDescription("");
+  };
 
-  function handleUpdateJob(formData) {
-    const updatedJob = {
-      ...editingJob,
-      ...formData,
-      requirements: typeof formData.requirements === "string"
-        ? formData.requirements.split(",").map(r => r.trim())
-        : formData.requirements,
-    };
-
-    updateJob(updatedJob);
-    setEditingJob(null);
-    setJobsList(getJobs()); // Update state to display updates instantly
-    toast.success("Job Updated Successfully");
-  }
-
-  function handleDelete(id) {
-    deleteJob(id);
-    setJobsList(getJobs()); // Update state to clean UI instantly
-    toast.info("Job Deleted Successfully");
-  }
+  if (loading) return <div style={{ padding: "3rem", textAlign: "center" }}>Loading Dashboard Pipeline...</div>;
 
   return (
-    <div className="container">
-      <h1>Dashboard</h1>
-      <h2>Welcome {currentUser.name}</h2>
-      <p style={{ textTransform: "capitalize", marginBottom: "20px" }}>Role: {currentUser.role}</p>
+    <div className="container" style={{ maxWidth: "1200px", margin: "2rem auto", padding: "1.5rem" }}>
+      <h1>Recruiter Management Hub</h1>
+      <p style={{ color: "#666" }}>Logged in as: <strong>{currentUser?.name}</strong></p>
 
-      {/* EMPLOYER INTERFACE */}
-      {currentUser.role === "employer" && (
-        <>
-          <JobForm
-            onSave={editingJob ? handleUpdateJob : handleAddJob}
-            initialData={editingJob}
-          />
+      {/* Metrics Counters Grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", margin: "2rem 0" }}>
+        <div style={{ padding: "1.5rem", background: "#f1f5f9", borderRadius: "8px", borderLeft: "5px solid #7c3aed" }}>
+          <h3>Total Openings</h3>
+          <p style={{ fontSize: "2rem", fontWeight: "bold", margin: "0" }}>{metrics.totalJobs}</p>
+        </div>
+        <div style={{ padding: "1.5rem", background: "#f1f5f9", borderRadius: "8px", borderLeft: "5px solid #7c3aed" }}>
+          <h3>Received Applications</h3>
+          <p style={{ fontSize: "2rem", fontWeight: "bold", margin: "0" }}>{metrics.totalApplications}</p>
+        </div>
+      </div>
 
-          {/* ADDED STATS SECTION */}
-          <div className="stats-grid" style={{ display: "flex", gap: "20px", marginTop: "30px", marginBottom: "20px" }}>
-            <div className="stat-card" style={{ background: "white", padding: "20px", borderRadius: "10px", flex: "1", boxShadow: "0 2px 5px rgba(0,0,0,0.05)" }}>
-              <h2>{employerJobs.length}</h2>
-              <p style={{ color: "#666" }}>Total Jobs</p>
-            </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginTop: "2rem" }}>
+        {/* Left Column: Post Job Form */}
+        <form onSubmit={handlePostJob} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <h2>Post a New Opening</h2>
+          <input type="text" placeholder="Job Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <input type="text" placeholder="Company Name" value={company} onChange={(e) => setCompany(e.target.value)} required />
+          <input type="text" placeholder="Location (e.target. e.g. Remote, Mumbai)" value={location} onChange={(e) => setLocation(e.target.value)} required />
+          <select value={type} onChange={(e) => setType(e.target.value)}>
+            <option>Full Time</option>
+            <option>Part Time</option>
+            <option>Remote</option>
+            <option>Internship</option>
+          </select>
+          <input type="text" placeholder="Salary Package (e.g. $80,000/yr)" value={salary} onChange={(e) => setSalary(e.target.value)} required />
+          <textarea placeholder="Job Description Specifications" rows="4" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
+          <button type="submit" style={{ padding: "0.75rem", cursor: "pointer", fontWeight: "bold" }}>Launch Vacancy</button>
+        </form>
 
-            <div className="stat-card" style={{ background: "white", padding: "20px", borderRadius: "10px", flex: "1", boxShadow: "0 2px 5px rgba(0,0,0,0.05)" }}>
-              <h2>
-                {employerJobs.reduce(
-                  (acc, job) => acc + getApplicationsByJob(job.id).length,
-                  0
-                )}
-              </h2>
-              <p style={{ color: "#666" }}>Total Applicants</p>
-            </div>
-          </div>
-
-          <h2 style={{ marginTop: "30px" }}>Your Job Listings</h2>
-          <div className="job-grid">
-            {employerJobs.length === 0 ? (
-              <p>You haven't posted any jobs yet.</p>
-            ) : (
-              employerJobs.map((job) => (
-                <div key={job.id} className="job-card">
-                  <h3>{job.title}</h3>
-                  <p>📍 {job.location}</p>
-                  <p>💰 {job.salary}</p>
-                  
-                  <div style={{ display: "flex", gap: "10px", margin: "15px 0" }}>
-                    <button onClick={() => setEditingJob(job)}>
-                      Edit
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(job.id)} 
-                      style={{ backgroundColor: "#E74C3C" }}
-                    >
-                      Delete
-                    </button>
-                  </div>
-
-                  <ApplicantList jobId={job.id} />
-                </div>
-              ))
-            )}
-          </div>
-        </>
-      )}
-
-      {/* CANDIDATE INTERFACE */}
-      {currentUser.role === "candidate" && (
-        <div className="applications">
-          <h2>My Applications</h2>
-          {applications.length === 0 ? (
-            <p>You haven't applied to any jobs yet.</p>
+        {/* Right Column: Applications Table List */}
+        <div>
+          <h2>Candidate Tracking Pipeline</h2>
+          {metrics.applications.length > 0 ? (
+            <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "1rem" }}>
+              <thead>
+                <tr style={{ background: "#111827", color: "#fff", textAlign: "left" }}>
+                  <th style={{ padding: "0.5rem" }}>Candidate</th>
+                  <th style={{ padding: "0.5rem" }}>Target Role</th>
+                  <th style={{ padding: "0.5rem" }}>Email</th>
+                </tr>
+              </thead>
+              <tbody>
+                {metrics.applications.map((app) => (
+                  <tr key={app.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
+                    <td style={{ padding: "0.75rem" }}>{app.candidate_name}</td>
+                    <td style={{ padding: "0.75rem" }}>{app.job_title}</td>
+                    <td style={{ padding: "0.75rem", color: "#6d28d9" }}>{app.candidate_email}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           ) : (
-            <div className="job-grid">
-              {applications.map((app) => (
-                <div key={app.id} className="application-card" style={{ background: "white", padding: "20px", borderRadius: "10px", marginTop: "15px" }}>
-                  <h3>{app.jobTitle}</h3>
-                  <p>🏢 {app.company}</p>
-                  <p>📅 Applied: {new Date(app.appliedDate).toLocaleDateString()}</p>
-                  <span className={`status-badge ${app.status.toLowerCase()}`} style={{ display: "inline-block", marginTop: "10px", padding: "5px 10px", borderRadius: "5px", background: "#EAECEE", fontWeight: "bold" }}>
-                    {app.status}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <p style={{ color: "#777", fontStyle: "italic", marginTop: "1rem" }}>No candidates have applied to your listings yet.</p>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
