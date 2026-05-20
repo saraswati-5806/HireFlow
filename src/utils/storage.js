@@ -129,3 +129,13 @@ if (typeof document !== "undefined") {
   `;
   document.head.appendChild(style);
 }
+
+// Quick export stubs to stop Vercel compilation errors
+export function setCurrentUser(user) {
+  localStorage.setItem("currentUser", JSON.stringify(user));
+}
+
+export function clearCurrentUser() {
+  localStorage.removeItem("currentUser");
+  localStorage.removeItem("hireflow_token");
+}
