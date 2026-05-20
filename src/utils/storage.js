@@ -58,11 +58,12 @@ async function getEmployerDashboard(employerId) {
 }
 
 // 3. AUTHENTICATION COMPATIBILITY STUBS
-void function setCurrentUser(user) {
+function setCurrentUser(user) {
   localStorage.setItem("currentUser", JSON.stringify(user));
 }
 
-void function clearCurrentUser() {
+// Fixed syntax: Standard function declarations
+function clearCurrentUser() {
   localStorage.removeItem("currentUser");
   localStorage.removeItem("hireflow_token");
 }
@@ -77,7 +78,7 @@ async function updateJob() { return { success: true }; }
 async function getApplicationsByCandidate() { return []; }
 async function getApplicationsByJob() { return []; }
 
-// 5. UNIFIED EXPORTS (This makes it impossible for Vite to throw a MISSING_EXPORT error)
+// 5. UNIFIED NAMED EXPORTS Block (Ensures compiler matches items perfectly)
 export {
   getJobs,
   getJobById,
