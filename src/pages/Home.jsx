@@ -1,66 +1,63 @@
 import { useState, useEffect } from "react";
 import { getJobs } from "../utils/storage";
+import { Link } from "react-router-dom";
 import JobCard from "../components/JobCard";
 
 export default function Home() {
+  const [homeJobs, setHomeJobs] = useState([]); // Clear, unique state variable name
   const [loading, setLoading] = useState(true);
-  {(Array.isArray(jobs) ? jobs : []).slice(0, 4).map((job) => (
-  <JobCard key={job.id} job={job} />
-  ))}
 
-  // Simulate an API / Database fetch delay
+  // Fetch jobs safely from backend server database on page mount
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
-    
-    return () => clearTimeout(timer); // Clean up the timer on component unmount
+    async function loadHomeData() {
+      try {
+        const data = await getJobs();
+        // Fallback validation: ensure state gets an array even if backend is offline
+        setHomeJobs(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to parse home listings:", error);
+        setHomeJobs([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadHomeData();
   }, []);
 
+  // Take up to 4 elements safely for the featured grid display
+  const featuredJobs = homeJobs.slice(0, 4);
+
   return (
-    <div className="container">
-      <section className="hero">
-        <h1>Find Your Dream Job</h1>
-        <p>Connect with top companies and employers.</p>
-      </section>
+    <div className="home-container" style={{ padding: "2rem 0", textAlign: "center" }}>
+      <div className="hero-section" style={{ marginBottom: "3rem" }}>
+        <h1 style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>Find Your Dream Job</h1>
+        <p style={{ color: "#666" }}>Connect with top companies and employers.</p>
+      </div>
 
-      <h2>Featured Jobs</h2>
+      <div className="featured-section" style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1rem" }}>
+        <h2 style={{ textAlign: "left", marginBottom: "1.5rem" }}>Featured Jobs</h2>
 
-      {loading ? (
-        /* SKELETON LOADING GRID */
-        <div className="job-grid">
-          {[1, 2, 3].map((n) => (
-            <div 
-              key={n} 
-              className="job-card skeleton" 
-              style={{ 
-                background: "#EAECEE", 
-                height: "200px", 
-                borderRadius: "10px",
-                opacity: 0.6,
-                animation: "pulse 1.5s infinite ease-in-out"
-              }}
-            >
-              {/* This mimics the layout of a card while it loads */}
-              <div style={{ height: "20px", background: "#BDC3C7", width: "70%", marginBottom: "15px", borderRadius: "4px" }}></div>
-              <div style={{ height: "15px", background: "#BDC3C7", width: "40%", marginBottom: "10px", borderRadius: "4px" }}></div>
-              <div style={{ height: "15px", background: "#BDC3C7", width: "50%", marginBottom: "20px", borderRadius: "4px" }}></div>
-              <div style={{ height: "35px", background: "#BDC3C7", width: "100%", borderRadius: "4px" }}></div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        /* ACTUAL REAL CONTENT GRID */
-        <div className="job-grid">
-          {jobs.length === 0 ? (
-            <p>No featured jobs available right now.</p>
-          ) : (
-            jobs.map((job) => (
+        {loading ? (
+          <p>Loading curated listings...</p>
+        ) : featuredJobs.length > 0 ? (
+          <div className="job-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
+            {featuredJobs.map((job) => (
               <JobCard key={job.id} job={job} />
-            ))
-          )}
+            ))}
+          </div>
+        ) : (
+          <div style={{ padding: "3rem 1rem", border: "1px dashed #ccc", borderRadius: "8px", background: "#f9f9f9" }}>
+            <p style={{ color: "#555", marginBottom: "1rem" }}>No featured listings found.</p>
+            <p style={{ fontSize: "0.85rem", color: "#888" }}>Make sure your local Node backend server is running on port 5000!</p>
+          </div>
+        )}
+
+        <div style={{ marginTop: "2.5rem" }}>
+          <Link to="/jobs" className="btn btn-primary" style={{ padding: "0.75rem 1.5rem", background: "#2563eb", color: "#fff", borderRadius: "5px", textDecoration: "none", fontWeight: "600" }}>
+            See All Openings
+          </Link>
         </div>
-      )}
+      </div>
     </div>
   );
 }
