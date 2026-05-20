@@ -128,9 +128,12 @@ textarea {
   }
 }
 
+
+
+/* 🌓 DARK MODE PARAMETERS */
 .dark {
   background: #121212;
-  color: white;
+  color: #f8fafc;
 }
 
 .dark .job-card,
@@ -138,7 +141,21 @@ textarea {
 .dark .navbar,
 .dark .footer {
   background: #1E1E1E;
+  color: #ffffff;
+  border-color: #334155;
+}
+
+/* Ensure form inputs remain legible in dark mode */
+.dark input, 
+.dark select, 
+.dark textarea {
+  background: #2d3748;
   color: white;
+  border: 1px solid #4a5568;
+}
+
+.dark a {
+  color: #38bdf8;
 }
 
 .stats-grid {

@@ -10,39 +10,29 @@ export default function InfoModals({ type, onClose }) {
           title: "My Profile Details",
           body: currentUser ? (
             <div>
-              <p style={{ margin: "0.5rem 0" }}><strong>Full Name:</strong> {currentUser.name || "N/A"}</p>
-              <p style={{ margin: "0.5rem 0" }}><strong>Email Address:</strong> {currentUser.email || "N/A"}</p>
-              <p style={{ margin: "0.5rem 0" }}><strong>Assigned System Role:</strong> {currentUser.role}</p>
-              <p style={{ margin: "0.5rem 0" }}><strong>Account Status:</strong> Active Local Stream Member</p>
+              <p><strong>Full Name:</strong> {currentUser.name || currentUser.username || "Candidate User"}</p>
+              <p><strong>Email Address:</strong> {currentUser.email || "student@hireflow.edu"}</p>
+              <p><strong>System Role:</strong> {currentUser.role}</p>
+              <p><strong>Account Status:</strong> Active Local Thread Instance</p>
             </div>
           ) : (
-            <p>No active user profiles found. Please sign in to verify attributes.</p>
+            <p>Please log in to view profile details.</p>
           )
         };
       case "about":
         return {
-          title: "About HireFlow Framework",
-          body: (
-            <p>HireFlow is an independent client-driven platform designed to remove complex overhead from entry-level engineering placement workflows. Operating inside isolated local memory layers, the framework delivers zero-latency workspace configurations instantly.</p>
-          )
+          title: "About HireFlow",
+          body: <p>HireFlow is a zero-latency workspace mapping tool that pairs talent pipelines directly with corporate hiring parameters.</p>
         };
       case "contact":
         return {
-          title: "Contact Engineering Support",
-          body: (
-            <div>
-              <p><strong>Corporate Workspace Hub:</strong> Tech Core Park, Phase II, Bangalore, KA</p>
-              <p><strong>Electronic Communication Logs:</strong> support@hireflow.edu</p>
-              <p><strong>System Assistance Channels:</strong> +91 80 4912 7000 (Mon-Fri, 09:00 - 18:00 IST)</p>
-            </div>
-          )
+          title: "Contact Support",
+          body: <p>Reach engineering logs electronically at: <strong>support@hireflow.edu</strong></p>
         };
       case "privacy":
         return {
-          title: "Privacy & Memory Isolation Guidelines",
-          body: (
-            <p>HireFlow secures parameters by running execution scripts entirely within separate client memory modules. No personal usage profiling sequences or session analytics indices are collected, recorded, or transmitted outside your workspace environment.</p>
-          )
+          title: "Isolated Privacy Policy",
+          body: <p>Data indices are processed and cached strictly within local hardware modules.</p>
         };
       default:
         return { title: "", body: null };
@@ -52,14 +42,12 @@ export default function InfoModals({ type, onClose }) {
   const content = getContent();
 
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(15, 23, 42, 0.7)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999, color: "#1e293b", fontFamily: "sans-serif" }}>
-      <div style={{ background: "white", padding: "2rem", borderRadius: "12px", width: "90%", maxWidth: "500px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.3)" }}>
-        <h3 style={{ marginTop: 0, color: "#115e59", fontSize: "1.4rem", borderBottom: "2px solid #f1f5f9", paddingBottom: "0.5rem" }}>{content.title}</h3>
-        <div style={{ margin: "1.5rem 0", lineHeight: "1.5", fontSize: "0.95rem" }}>{content.body}</div>
+    <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(0,0,0,0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999, color: "#1e293b" }}>
+      <div style={{ background: "white", padding: "2rem", borderRadius: "8px", width: "90%", maxWidth: "450px" }}>
+        <h3 style={{ marginTop: 0, color: "#0d9488" }}>{content.title}</h3>
+        <div style={{ margin: "1rem 0", lineHeight: "1.5" }}>{content.body}</div>
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <button onClick={onClose} style={{ background: "#0d9488", color: "white", border: "none", padding: "0.5rem 1.25rem", borderRadius: "6px", fontWeight: "600", cursor: "pointer" }}>
-            Dismiss View
-          </button>
+          <button onClick={onClose} style={{ background: "#0d9488", color: "white", border: "none", padding: "0.5rem 1rem", borderRadius: "4px", cursor: "pointer" }}>Close</button>
         </div>
       </div>
     </div>

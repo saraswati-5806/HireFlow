@@ -1,69 +1,51 @@
 import { createContext, useContext, useState, useEffect } from "react";
-// Remove named imports that break compilation and import everything under a single storage object
 import * as storage from "../utils/storage";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem("currentUser");
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [currentUser, setCurrentUser] = useState(() => storage.getCurrentUser());
+  // 🌓 Add state around line 10
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
 
-  const login = async (email, password) => {
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Login failed");
-      }
-      
-      const user = await response.json();
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      setCurrentUser(user);
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
+  useEffect(() => {
+    storage.setCurrentUser(currentUser);
+  }, [currentUser]);
+
+  // Sync dark mode state with localStorage configuration
+  useEffect(() => {
+    if (darkMode) {
+      localStorage.setItem("theme", "dark");
+    } else {
+      localStorage.setItem("theme", "light");
     }
-  };
+  }, [darkMode]);
 
-  const signup = async (name, email, password, role) => {
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, role }),
-      });
-
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Signup failed");
-      }
-
-      const user = await response.json();
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      setCurrentUser(user);
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+  const login = (user) => {
+    setCurrentUser(user);
+    storage.setCurrentUser(user);
   };
 
   const logout = () => {
-    localStorage.removeItem("currentUser");
     setCurrentUser(null);
+    storage.clearCurrentUser();
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, signup, logout }}>
+    <AuthContext.Provider
+      value={{
+        currentUser,
+        login,
+        logout,
+        darkMode, // 🌟 Added to provider
+        setDarkMode // 🌟 Added to provider
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  return useContext(AuthContext);
+}

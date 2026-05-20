@@ -6,36 +6,41 @@ import Jobs from "./pages/Jobs";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+
+// Inner shell component allows reading context values below AuthProvider safely
+function AppContent() {
+  const { darkMode } = useAuth(); // 🌟 Read theme state safely inside provider node
+
+  return (
+    <div className={darkMode ? "dark" : ""} style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <Navbar />
+      
+      <main style={{ flex: "1 0 auto" }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/jobs" element={<Jobs />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          
+          {/* Quick links to match existing configurations */}
+          <Route path="/applicants" element={<Dashboard />} />
+          <Route path="/jobs-posted" element={<Dashboard />} />
+          <Route path="/my-applications" element={<Dashboard />} />
+        </Routes>
+      </main>
+      
+      <Footer />
+    </div>
+  );
+}
 
 export default function App() {
   return (
     <AuthProvider>
       <Router>
-        {/* The Flexbox wrapper pushes the footer to the bottom */}
-        <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", width: "100%" }}>
-          
-          <Navbar />
-          
-          {/* Main content takes up all available vertical space */}
-          <main style={{ flex: "1 0 auto", width: "100%" }}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/jobs" element={<Jobs />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              
-              {/* Short-cut fallbacks for footer links */}
-              <Route path="/applicants" element={<Dashboard />} />
-              <Route path="/jobs-posted" element={<Dashboard />} />
-              <Route path="/my-applications" element={<Dashboard />} />
-            </Routes>
-          </main>
-          
-          <Footer />
-          
-        </div>
+        <AppContent />
       </Router>
     </AuthProvider>
   );
