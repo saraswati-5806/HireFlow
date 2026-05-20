@@ -6,11 +6,11 @@ export default function InfoModals({ type, onClose }) {
           title: "Find Recruiters Directory",
           body: (
             <div>
-              <p>Connect with active corporate talent acquisition managers looking for software engineering talent:</p>
+              <p>Connect directly with premium corporate talent acquisition acquisition loops looking for student engineers:</p>
               <ul>
-                <li><strong>Acme Corporate Tech:</strong> Specialized in cloud systems architecture.</li>
-                <li><strong>NexGen Systems Group:</strong> Focusing on React frontend engineering loops.</li>
-                <li><strong>Global Data Nodes:</strong> Core backend infrastructure placement openings.</li>
+                <li><strong>Acme Corporate Tech:</strong> Cloud infrastructure development pods.</li>
+                <li><strong>NexGen Systems Group:</strong> Interactive web and frontend engineering teams.</li>
+                <li><strong>Global Data Nodes:</strong> Core optimization and system scaling workspaces.</li>
               </ul>
             </div>
           )
