@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // 🌟 FIX: This import resolves the "useAuth is not defined" error!
+import { useAuth } from "../context/AuthContext";
 import * as storage from "../utils/storage";
 
 export default function Navbar() {
@@ -19,7 +19,6 @@ export default function Navbar() {
       </div>
       
       <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
-        {/* Home option is always present */}
         <Link to="/" style={{ color: "#115e59", textDecoration: "none", fontWeight: "600" }}>Home</Link>
 
         {!currentUser ? (
@@ -36,7 +35,7 @@ export default function Navbar() {
             <button onClick={handleLogoutClick} style={{ background: "#ef4444", color: "white", border: "none", padding: "0.5rem 1rem", borderRadius: "6px", fontWeight: "600", cursor: "pointer" }}>Logout</button>
           </>
         ) : (
-          /* 💼 EMPLOYER VIEW - EXACTLY 4 OPTIONS: Home, Employer Dashboard, Applicants, Logout */
+          /* 💼 EMPLOYER: Exactly 4 choices */
           <>
             <Link to="/dashboard" style={{ color: "#115e59", textDecoration: "none", fontWeight: "600" }}>Employer Dashboard</Link>
             <Link to="/applicants" style={{ color: "#115e59", textDecoration: "none", fontWeight: "600" }}>Applicants</Link>
