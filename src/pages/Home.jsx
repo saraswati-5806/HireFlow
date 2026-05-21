@@ -15,8 +15,8 @@ export default function Home() {
       margin: "0 auto",
       padding: "4rem 2rem",
       boxSizing: "border-box",
-      // Dark elegant overlay layer mixed with a high-tech cityscape/network background image
-      backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url(${homeBgImage})`,
+      // Points directly to public/bg-hero.jpg securely with zero reference errors!
+      backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url('/bg-hero.jpg')`,
       backgroundSize: "cover",
       backgroundPosition: "center",
       backgroundRepeat: "no-repeat"
