@@ -3,13 +3,13 @@
 export function seedDemoData() {
   if (localStorage.getItem("hireflow_seeded") === "true") return;
 
-  // 🔐 Mandated Core Testing Profile Metrics
+  // 🔐 Mandated Core Testing Profile Metrics with lowercase role parameters
   const coreEmployer = {
     id: "user_emp_1",
     name: "Employer 1",
     email: "emp123@nova.com",
     password: "emp123",
-    role: "Employer",
+    role: "employer",
     company: "NovaSpark Solutions"
   };
 
@@ -18,7 +18,7 @@ export function seedDemoData() {
     name: "Ananya Iyer",
     email: "ananya@nova.com",
     password: "demo123",
-    role: "Candidate",
+    role: "candidate",
     company: ""
   };
 
@@ -48,7 +48,6 @@ export function seedDemoData() {
     { id: "n_job_22", title: "Principal Systems Engineer", company: "NovaSpark Solutions", location: "Bangalore, KA", salary: "30-40 LPA", description: "Design foundational operating systems blocks for the enterprise loop.", requirements: ["C++ Architecture", "Kernel Level Compilation"], postedBy: "user_emp_1" }
   ];
 
-  // Mock initial evaluation applications so your candidate applicant viewing panel pops with real data
   const initialApps = [
     { id: "app_mock_1", jobId: "n_job_1", candidateId: "user_cand_demo", candidateName: "Ananya Iyer", candidateEmail: "ananya@nova.com", resumeText: "Passionate mobile engineer with 2+ years React experience.", appliedAt: new Date().toLocaleDateString() },
     { id: "app_mock_2", jobId: "n_job_3", candidateId: "user_cand_demo", candidateName: "Ananya Iyer", candidateEmail: "ananya@nova.com", resumeText: "Expert in product dashboard UI patterns and prototyping.", appliedAt: new Date().toLocaleDateString() }
@@ -99,13 +98,17 @@ export function deleteJob(jobId) {
   const jobs = getJobs().filter((j) => j.id !== jobId);
   localStorage.setItem("hireflow_jobs", JSON.stringify(jobs));
   
-  // Clear linked structural applications cascade to avoid memory clutter
   const apps = getApplications().filter((a) => a.jobId !== jobId);
   localStorage.setItem("hireflow_applications", JSON.stringify(apps));
 }
 
 export function getApplications() {
   return JSON.parse(localStorage.getItem("hireflow_applications") || "[]");
+}
+
+export function getApplicationsByJob(jobId) {
+  const apps = getApplications();
+  return apps.filter((a) => a.jobId === jobId);
 }
 
 export function addApplication(appData) {

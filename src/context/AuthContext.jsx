@@ -14,7 +14,6 @@ export function AuthProvider({ children }) {
 
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
 
-  // 🌓 Unified Dark Mode Effect: Keeps localStorage and HTML Document Body perfectly in sync
   useEffect(() => {
     if (darkMode) {
       localStorage.setItem("theme", "dark");
@@ -24,24 +23,27 @@ export function AuthProvider({ children }) {
     document.body.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-  // 🔐 Authentication Handlers
   const login = (user) => {
-    setCurrentUser(user);
-    storage.setCurrentUser(user);
+    // Force role strings to match exactly what our templates expect
+    const normalizedUser = {
+      ...user,
+      role: user.role.trim().toLowerCase() === "employer" ? "employer" : "candidate"
+    };
+    setCurrentUser(normalizedUser);
+    storage.setCurrentUser(normalizedUser);
   };
 
   const signup = (userData) => {
-    // Uses the same key format 'hireflow_users' to keep matching registration channels consistent
     const users = JSON.parse(localStorage.getItem("hireflow_users") || "[]");
 
-    if (users.some((u) => u.email === userData.email)) {
+    if (users.some((u) => u.email.trim().toLowerCase() === userData.email.trim().toLowerCase())) {
       throw new Error("This email is already registered inside our routing logs.");
     }
 
     const newUser = {
       ...userData,
       id: "user_" + Math.random().toString(36).substr(2, 9),
-      role: userData.role.toLowerCase() === "employer" ? "Employer" : "Candidate", // Case normalization fix
+      role: userData.role.toLowerCase() === "employer" ? "employer" : "candidate", 
     };
 
     users.push(newUser);
