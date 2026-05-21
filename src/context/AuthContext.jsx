@@ -1,66 +1,58 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import * as storage from "../utils/storage";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      return storage.getCurrentUser();
-    } catch (e) {
-      return null;
-    }
-  });
-
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (darkMode) {
-      localStorage.setItem("theme", "dark");
-    } else {
-      localStorage.setItem("theme", "light");
+    const user = storage.getCurrentUser();
+    if (user) {
+      // Standardize role to title-case when restoring session
+      const formattedRole = user.role?.toLowerCase() === "employer" ? "Employer" : "Candidate";
+      setCurrentUser({ ...user, role: formattedRole });
     }
-    document.body.classList.toggle("dark", darkMode);
-  }, [darkMode]);
+    setLoading(false);
+  }, []);
 
   const login = (user) => {
-    // Force role strings to match exactly what our templates expect
-    const normalizedUser = {
-      ...user,
-      role: user.role.trim().toLowerCase() === "employer" ? "employer" : "candidate"
-    };
-    setCurrentUser(normalizedUser);
-    storage.setCurrentUser(normalizedUser);
+    // Force title-case immediately upon entering application pipeline
+    const formattedRole = user.role?.toLowerCase() === "employer" ? "Employer" : "Candidate";
+    const updatedUser = { ...user, role: formattedRole };
+    
+    storage.setCurrentUser(updatedUser);
+    setCurrentUser(updatedUser);
   };
 
   const signup = (userData) => {
-    const users = JSON.parse(localStorage.getItem("hireflow_users") || "[]");
-
-    if (users.some((u) => u.email.trim().toLowerCase() === userData.email.trim().toLowerCase())) {
-      throw new Error("This email is already registered inside our routing logs.");
-    }
-
+    const storedUsers = JSON.parse(localStorage.getItem("hireflow_users") || "[]");
+    
     const newUser = {
-      ...userData,
       id: "user_" + Math.random().toString(36).substr(2, 9),
-      role: userData.role.toLowerCase() === "employer" ? "employer" : "candidate", 
+      name: userData.name,
+      email: userData.email,
+      password: userData.password,
+      role: userData.role.toLowerCase(), // stored lowercase in user DB
+      company: userData.role.toLowerCase() === "employer" ? "NovaSpark Solutions" : ""
     };
 
-    users.push(newUser);
-    localStorage.setItem("hireflow_users", JSON.stringify(users));
-
-    setCurrentUser(newUser);
-    storage.setCurrentUser(newUser);
+    storedUsers.push(newUser);
+    localStorage.setItem("hireflow_users", JSON.stringify(storedUsers));
+    
+    // Log them in automatically with corrected title-casing
+    login(newUser);
   };
 
   const logout = () => {
-    setCurrentUser(null);
     storage.clearCurrentUser();
+    setCurrentUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, signup, logout, darkMode, setDarkMode }}>
-      {children}
+    <AuthContext.Provider value={{ currentUser, login, signup, logout }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 }
