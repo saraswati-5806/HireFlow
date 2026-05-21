@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     
-    // --- STEP 1: FETCH AUTHENTIC DATA FROM USER STORAGE ---
+    // 1. FETCH ACTUAL STORAGE VALUES
     let jobs = JSON.parse(localStorage.getItem('hireflow_jobs')) || [];
     let applications = JSON.parse(localStorage.getItem('hireflow_applications')) || [];
     let users = JSON.parse(localStorage.getItem('hireflow_users')) || [];
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let applicationsChart = null;
     let categoryChart = null;
 
-    // --- STEP 2: REFRESH KPI COUNTER CARDS ---
+    // 2. COUNTER FUNCTION WITH FALLBACK PROTECTION
     function updateKPICards() {
         const totalJobsEl = document.getElementById('total-jobs');
         const totalAppsEl = document.getElementById('total-apps');
@@ -20,23 +20,22 @@ document.addEventListener('DOMContentLoaded', function () {
         if (totalUsersEl) totalUsersEl.innerText = users.length;
         
         if (activeJobsEl) {
-            // Flexible status check (handles 'active', 'open', or missing field defaults)
-            const activeCount = jobs.filter(job => !job.status || job.status === 'active' || job.status === 'open').length;
+            const activeCount = jobs.filter(job => !job.status || job.status.toLowerCase() === 'active' || job.status.toLowerCase() === 'open').length;
             activeJobsEl.innerText = activeCount;
         }
     }
 
-    // --- STEP 3: RENDER THE LIVE DATA TABLES ---
-    function renderTables(filteredJobs = jobs) {
+    // 3. TABLE RENDERING SYSTEM (MAPPED DIRECTLY TO YOUR VALUES)
+    function renderTables() {
+        // --- Jobs Table ---
         const jobsTableBody = document.getElementById('jobs-table-body');
         if (jobsTableBody) {
             jobsTableBody.innerHTML = ''; 
-            filteredJobs.forEach((job, index) => {
-                // AUTO-DETECT PROPERTY NAMES: Checks if your project uses 'title' or 'designation'/'role'
-                const displayTitle = job.title || job.designation || job.role || 'Untitled Position';
-                const displayCategory = job.category || job.corporateEntity || 'General';
-                const displayStatus = job.status || 'Active';
+            jobs.forEach((job, index) => {
                 const displayId = job.id || (index + 1);
+                const displayTitle = job.title || job.designation || 'Untitled Position';
+                const displayCategory = job.category || 'General';
+                const displayStatus = job.status || 'Active';
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -44,34 +43,40 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td><strong>${displayTitle}</strong></td>
                     <td>${displayCategory}</td>
                     <td><span style="color: ${displayStatus.toLowerCase() === 'active' ? '#4caf50' : '#e74c3c'}">${displayStatus.toUpperCase()}</span></td>
-                    <td><button class="logout-btn" style="padding: 4px 8px; font-size: 0.8rem; margin: 0;" onclick="deleteJob('${displayId}')">Delete</button></td>
+                    <td><button class="logout-btn" style="padding: 4px 8px; font-size: 0.8rem; margin: 0; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="deleteJob('${displayId}')">Delete</button></td>
                 `;
                 jobsTableBody.appendChild(row);
             });
         }
 
+        // --- Applicants Table ---
         const appsTableBody = document.getElementById('apps-table-body');
         if (appsTableBody) {
-            appsTableBody.innerHTML = ''; 
-            applications.forEach(app => {
-                const displayAppName = app.name || app.applicantName || 'Anonymous';
-                const displayAppliedJob = app.appliedFor || app.jobTitle || app.designation || 'Viewed Position';
-                const displayEmail = app.email || 'No Email Registered';
+            appsTableBody.innerHTML = ''; // Clear previous contents
+            
+            if (applications.length === 0) {
+                appsTableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 15px; color: #888;">No applications submitted yet.</td></tr>`;
+            } else {
+                applications.forEach(app => {
+                    // Pulling directly from your 'name', 'email', and 'appliedFor' keys
+                    const displayAppName = app.name || 'Anonymous Candidate';
+                    const displayEmail = app.email || 'No Email';
+                    const displayAppliedJob = app.appliedFor || 'Not Specified';
 
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${displayAppName}</td>
-                    <td>${displayAppliedJob}</td>
-                    <td>${displayEmail}</td>
-                `;
-                appsTableBody.appendChild(row);
-            });
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${displayAppName}</strong></td>
+                        <td>${displayEmail}</td>
+                        <td><span style="background: #eef2f7; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">${displayAppliedJob}</span></td>
+                    `;
+                    appsTableBody.appendChild(row);
+                });
+            }
         }
     }
 
-    // --- STEP 4: SAFE STORAGE DELETION CONTROLLER ---
+    // 4. DELETION HANDLING CONTROL
     window.deleteJob = function(jobId) {
-        // Keeps item if string or number values don't match the targeted deletion ID
         jobs = jobs.filter((job, index) => String(job.id || (index + 1)) !== String(jobId));
         localStorage.setItem('hireflow_jobs', JSON.stringify(jobs));
         
@@ -80,42 +85,19 @@ document.addEventListener('DOMContentLoaded', function () {
         generateCharts(); 
     };
 
-    // --- STEP 5: LIVE FILTERING OPERATIONS ---
-    function filterJobsData() {
-        const searchInput = document.getElementById('jobSearch')?.value.toLowerCase() || '';
-        const selectedCategory = document.getElementById('categoryFilter')?.value || 'all';
-
-        const filtered = jobs.filter(job => {
-            const title = (job.title || job.designation || job.role || '').toLowerCase();
-            const category = (job.category || job.corporateEntity || '');
-            
-            const matchesSearch = title.includes(searchInput);
-            const matchesCategory = selectedCategory === 'all' || category === selectedCategory;
-            return matchesSearch && matchesCategory;
-        });
-
-        renderTables(filtered);
-    }
-
-    document.getElementById('jobSearch')?.addEventListener('input', filterJobsData);
-    document.getElementById('categoryFilter')?.addEventListener('change', filterJobsData);
-
-    // --- STEP 6: DYNAMIC LIVE CHART GENERATION ---
+    // 5. CHART VISUAL ENGINE
     function generateCharts() {
         if (applicationsChart) applicationsChart.destroy();
         if (categoryChart) categoryChart.destroy();
 
-        const jobTitles = jobs.map(j => j.title || j.designation || j.role || 'Untitled');
+        const jobTitles = jobs.map(j => j.title || j.designation || 'Untitled');
         const appCounts = jobTitles.map(title => {
-            return applications.filter(app => {
-                const appJob = app.appliedFor || app.jobTitle || app.designation || '';
-                return appJob === title;
-            }).length;
+            return applications.filter(app => app.appliedFor === title).length;
         });
 
-        const categories = [...new Set(jobs.map(j => j.category || j.corporateEntity || 'General'))];
+        const categories = [...new Set(jobs.map(j => j.category || 'General'))];
         const categoryCounts = categories.map(cat => {
-            return jobs.filter(job => (job.category || job.corporateEntity || 'General') === cat).length;
+            return jobs.filter(job => (job.category || 'General') === cat).length;
         });
 
         const ctxBar = document.getElementById('applicationsChart');
@@ -123,14 +105,14 @@ document.addEventListener('DOMContentLoaded', function () {
             applicationsChart = new Chart(ctxBar.getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: jobTitles.length ? jobTitles : ['No Live Data'],
+                    labels: jobTitles.length ? jobTitles : ['No Active Openings'],
                     datasets: [{
                         label: 'Applications Received',
                         data: appCounts.length ? appCounts : [0],
                         backgroundColor: '#2e6da4'
                     }]
                 },
-                options: { responsive: true, scales: { y: { beginAtZero: true } } }
+                options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
             });
         }
 
@@ -139,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
             categoryChart = new Chart(ctxPie.getContext('2d'), {
                 type: 'pie',
                 data: {
-                    labels: categories.length ? categories : ['No Live Data'],
+                    labels: categories.length ? categories : ['No Data Available'],
                     datasets: [{
                         data: categoryCounts.length ? categoryCounts : [0],
                         backgroundColor: ['#2e6da4', '#4caf50', '#ff9800', '#9c27b0']
@@ -150,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // --- EXECUTE ON LOAD ---
+    // INITIAL SETUP RUN
     updateKPICards();
     renderTables();
     generateCharts();
