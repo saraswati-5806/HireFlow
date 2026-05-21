@@ -7,18 +7,21 @@ export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  // Form handling infrastructure variables
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingJob, setEditingJob] = useState(null);
   const [formData, setFormData] = useState({ title: "", company: "", salary: "", location: "", description: "" });
 
+  // Normalize checks to handle both lowercase and uppercase roles gracefully
+  const isEmployer = currentUser?.role?.toLowerCase() === "employer";
+  const isCandidate = currentUser?.role?.toLowerCase() === "candidate";
+
   async function loadDashboardCore() {
     setLoading(true);
     try {
-      if (currentUser?.role === "Employer") {
+      if (isEmployer) {
         const data = storage.getEmployerDashboard(currentUser.id);
         setDashboardData(data);
-      } else if (currentUser?.role === "Candidate") {
+      } else if (isCandidate) {
         const data = storage.getCandidateApplications(currentUser.id);
         setDashboardData(data);
       }
@@ -35,7 +38,6 @@ export default function Dashboard() {
     }
   }, [currentUser]);
 
-  // 🛠️ CRUD Actions
   const handleOpenCreateForm = () => {
     setEditingJob(null);
     setFormData({ title: "", company: currentUser?.company || "NovaSpark Solutions", salary: "", location: "", description: "" });
@@ -77,14 +79,13 @@ export default function Dashboard() {
           <h2>Operational Control Dashboard</h2>
           <p>Logged in Node: <strong style={{ color: "#0d9488" }}>{currentUser?.name}</strong> Panel ({currentUser?.role})</p>
         </div>
-        {currentUser?.role === "Employer" && (
+        {isEmployer && (
           <button onClick={handleOpenCreateForm} style={{ background: "#0d9488", color: "white", padding: "0.75rem 1.5rem", border: "none", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}>
             ➕ Inject New Job Listing
           </button>
         )}
       </div>
 
-      {/* 📝 Controlled Modal Dialog Component Form */}
       {isFormOpen && (
         <div style={{ background: "rgba(15,23,42,0.7)", position: "fixed", top: 0, left: 0, width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
           <div style={{ background: "white", padding: "2rem", borderRadius: "8px", width: "100%", maxWidth: "550px", color: "#1e293b" }}>
@@ -92,8 +93,8 @@ export default function Dashboard() {
             <form onSubmit={handleFormSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}>
               <input type="text" placeholder="Job Designation Title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required style={{ padding: "0.6rem" }} />
               <input type="text" placeholder="Corporate Entity Brand Name" value={formData.company} onChange={(e) => setFormData({ ...formData, company: e.target.value })} required disabled style={{ padding: "0.6rem" }} />
-              <input type="text" placeholder="Compensation Package Structure (e.g. 12-15 LPA)" value={formData.salary} onChange={(e) => setFormData({ ...formData, salary: e.target.value })} required style={{ padding: "0.6rem" }} />
-              <input type="text" placeholder="Geographic Operation Bounds (e.g. Remote)" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} required style={{ padding: "0.6rem" }} />
+              <input type="text" placeholder="Compensation Package Structure" value={formData.salary} onChange={(e) => setFormData({ ...formData, salary: e.target.value })} required style={{ padding: "0.6rem" }} />
+              <input type="text" placeholder="Geographic Operation Bounds" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} required style={{ padding: "0.6rem" }} />
               <textarea placeholder="Job Functions Log Scope" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required style={{ padding: "0.6rem", minHeight: "120px" }} />
               <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end", marginTop: "1rem" }}>
                 <button type="button" onClick={() => setIsFormOpen(false)} style={{ background: "#94a3b8", color: "white" }}>Abort</button>
@@ -104,15 +105,13 @@ export default function Dashboard() {
         </div>
       )}
 
-      {currentUser?.role === "Employer" ? (
+      {isEmployer ? (
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "2rem", marginTop: "2rem" }}>
-          
-          {/* 🗂️ 22 Active Listing Management Pipeline Panels */}
           <div>
             <h3>Active System Allocation Records ({dashboardData?.postedJobs?.length || 0})</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}>
               {dashboardData?.postedJobs?.map((job) => (
-                <div key={job.id} style={{ background: "#ffffff", border: "1px solid #e2e8f0", padding: "1.25rem", borderRadius: "8px", boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
+                <div key={job.id} style={{ background: "#ffffff", border: "1px solid #e2e8f0", padding: "1.25rem", borderRadius: "8px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
                       <h4 style={{ margin: "0 0 0.25rem 0", color: "#0f172a" }}>{job.title}</h4>
@@ -128,7 +127,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* 👤 Candidate Applicants Pipeline Viewer */}
           <div>
             <h3>Submitted Applicant Streams</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}>
@@ -148,7 +146,6 @@ export default function Dashboard() {
               )}
             </div>
           </div>
-
         </div>
       ) : (
         <div style={{ marginTop: "2rem" }}>

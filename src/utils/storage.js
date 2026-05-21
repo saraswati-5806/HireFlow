@@ -77,6 +77,11 @@ export function getJobs() {
   return JSON.parse(localStorage.getItem("hireflow_jobs") || "[]");
 }
 
+export function getJobById(jobId) {
+  const jobs = getJobs();
+  return jobs.find((j) => j.id === jobId) || null;
+}
+
 export function addJob(jobData) {
   const jobs = getJobs();
   const newJob = {
