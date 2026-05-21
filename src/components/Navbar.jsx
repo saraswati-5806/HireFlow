@@ -1,46 +1,57 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
-  const auth = useAuth();
-  
-  // Safe default values if context returns null unexpectedly
-  const currentUser = auth ? auth.currentUser : null;
-  const logout = auth ? auth.logout : () => {};
-  const darkMode = auth ? auth.darkMode : false;
-  const setDarkMode = auth ? auth.setDarkMode : () => {};
+  const { currentUser, logout, darkMode, setDarkMode } = useAuth() || {};
+  const navigate = useNavigate();
+
+  const handleLogoutClick = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
-    <nav className="navbar">
-      <h2>HireFlow</h2>
+    <nav style={{
+      display: "flex", 
+      justifyContent: "space-between", 
+      alignItems: "center", 
+      padding: "1rem 2rem",
+      background: darkMode ? "#1e293b" : "#ffffff",
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      borderBottom: darkMode ? "1px solid #334155" : "1px solid #e2e8f0"
+    }}>
+      <div style={{ fontWeight: "bold", fontSize: "1.3rem", color: "#0d9488", cursor: "pointer" }} onClick={() => navigate("/")}>
+        HireFlow 🚀
+      </div>
 
-      <div className="nav-links">
-        <Link to="/">Home</Link>
-        <Link to="/jobs">Jobs</Link>
-
-        {!currentUser && (
-          <>
-            <Link to="/login">Login</Link>
-            <Link to="/signup">Signup</Link>
-          </>
-        )}
-
-        {currentUser && (
-          <>
-            <Link to="/dashboard">Dashboard</Link>
-            <button onClick={logout} className="logout-btn">Logout</button>
-          </>
-        )}
-
+      <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+        <Link to="/jobs" style={{ color: darkMode ? "#f8fafc" : "#334155", textDecoration: "none" }}>Browse Jobs</Link>
         
-
-        {/* 🌓 Dark Mode Toggler */}
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          style={{ background: "transparent", border: "none", fontSize: "1.2rem", cursor: "pointer", padding: "0 0.5rem" }}
+        {/* 🌓 Dark Mode Toggle Switch */}
+        <button 
+          onClick={() => setDarkMode(!darkMode)} 
+          style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "1.2rem" }}
+          title="Toggle UI Color Mode"
         >
           {darkMode ? "☀️" : "🌙"}
         </button>
+
+        {!currentUser ? (
+          <>
+            <Link to="/login"><button style={{ background: "transparent", color: "#0d9488", border: "1px solid #0d9488" }}>Login</button></Link>
+            <Link to="/signup"><button style={{ background: "#0d9488", color: "white" }}>Sign Up</button></Link>
+          </>
+        ) : currentUser.role === "Candidate" ? (
+          <>
+            <Link to="/dashboard" style={{ color: darkMode ? "#f8fafc" : "#334155", textDecoration: "none" }}>My Workspace</Link>
+            <button onClick={handleLogoutClick} style={{ background: "#64748b", color: "white" }}>Disconnect</button>
+          </>
+        ) : (
+          <>
+            <Link to="/dashboard" style={{ color: darkMode ? "#f8fafc" : "#334155", textDecoration: "none" }}>Employer Panel</Link>
+            <button onClick={handleLogoutClick} style={{ background: "#64748b", color: "white" }}>Disconnect</button>
+          </>
+        )}
       </div>
     </nav>
   );
