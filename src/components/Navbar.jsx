@@ -32,9 +32,7 @@ export default function Navbar() {
           </>
         )}
 
-        <Link to="/admin" style={{ padding: '10px', color: '#2e6da4', fontWeight: 'bold' }}>
-          💼 Admin Panel
-        </Link>
+        
 
         {/* 🌓 Dark Mode Toggler */}
         <button
