@@ -42,7 +42,7 @@ export default function Navbar() {
         <Link to="/jobs" style={{ color: darkMode ? "#f8fafc" : "#334155", textDecoration: "none" }}>Browse Jobs</Link>
         
         <button 
-          onClick={() => setDarkMode(!darkMode)} 
+          onClick={() => setDarkMode && setDarkMode(!darkMode)} 
           style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "1.2rem" }}
           title="Toggle UI Color Mode"
         >

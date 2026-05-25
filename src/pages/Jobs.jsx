@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import * as storage from "../utils/storage";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // Import auth state hook
 
 export default function Jobs() {
   const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const { darkMode } = useAuth() || {}; // Access the dark mode state reference
 
   useEffect(() => {
     setJobs(storage.getJobs() || []);
@@ -17,20 +19,35 @@ export default function Jobs() {
   });
 
   return (
-    <div style={{ maxWidth: "1100px", margin: "2rem auto", padding: "0 1rem" }}>
+    <div style={{ maxWidth: "1100px", margin: "2rem auto", padding: "0 1rem", color: darkMode ? "#f8fafc" : "#0f172a" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
-        <h2>Strategic Opportunities Pipeline</h2>
+        <h2 style={{ color: darkMode ? "#f8fafc" : "#1e293b" }}>Strategic Opportunities Pipeline</h2>
         <input 
           type="text" 
           placeholder="Filter by designation or corporate entity..." 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ width: "100%", maxWidth: "400px", padding: "0.6rem", borderRadius: "6px", border: "1px solid #cbd5e1" }}
+          style={{ 
+            width: "100%", 
+            maxWidth: "400px", 
+            padding: "0.6rem", 
+            borderRadius: "6px", 
+            border: darkMode ? "1px solid #334155" : "1px solid #cbd5e1",
+            background: darkMode ? "#1e293b" : "#ffffff",
+            color: darkMode ? "#f8fafc" : "#0f172a"
+          }}
         />
       </div>
 
       {filteredJobs.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "5rem 2rem", background: "#f8fafc", borderRadius: "8px", border: "2px dashed #cbd5e1" }}>
+        <div style={{ 
+          textAlign: "center", 
+          padding: "5rem 2rem", 
+          background: darkMode ? "#1e293b" : "#f8fafc", 
+          borderRadius: "8px", 
+          border: darkMode ? "2px dashed #334155" : "2px dashed #cbd5e1",
+          color: darkMode ? "#94a3b8" : "#64748b"
+        }}>
           <h3>No Operational Paths Found</h3>
         </div>
       ) : (
@@ -41,22 +58,22 @@ export default function Jobs() {
               onClick={() => navigate(`/jobs/${job.id}`)} // ✨ Absolute Router navigation route string applied on card click
               style={{ 
                 padding: "1.5rem", 
-                background: "#ffffff", 
-                border: "1px solid #e2e8f0", 
+                background: darkMode ? "#1e293b" : "#ffffff", 
+                border: darkMode ? "1px solid #334155" : "1px solid #e2e8f0", 
                 borderRadius: "8px", 
                 boxShadow: "0 4px 6px rgba(0,0,0,0.02)", 
                 cursor: "pointer", 
                 display: "flex", 
                 flexDirection: "column", 
                 justifyContent: "space-between",
-                transition: "transform 0.2s ease"
+                transition: "transform 0.2s ease, background 0.3s ease, border 0.3s ease"
               }}
               className="job-card"
             >
               <div>
                 <h3 style={{ margin: "0 0 0.5rem 0", color: "#0d9488" }}>{job.title}</h3>
-                <h5 style={{ margin: "0 0 1rem 0", color: "#475569" }}>🏢 {job.company}</h5>
-                <p style={{ fontSize: "0.9rem", color: "#64748b", margin: "0 0 1rem 0" }}>
+                <h5 style={{ margin: "0 0 1rem 0", color: darkMode ? "#cbd5e1" : "#475569" }}>🏢 {job.company}</h5>
+                <p style={{ fontSize: "0.9rem", color: darkMode ? "#94a3b8" : "#64748b", margin: "0 0 1rem 0" }}>
                   {job.description?.substring(0, 100)}...
                 </p>
               </div>

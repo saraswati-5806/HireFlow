@@ -6,6 +6,7 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [darkMode, setDarkMode] = useState(false); // Added State
 
   useEffect(() => {
     const user = storage.getCurrentUser();
@@ -51,12 +52,17 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, signup, logout }}>
+    <AuthContext.Provider value={{ currentUser, login, signup, logout, darkMode, setDarkMode }}>
       {!loading && children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) {
+    // Fallback safe envelope object to prevent production runtime crash flags
+    return { currentUser: null, login: () => {}, signup: () => {}, logout: () => {}, darkMode: false, setDarkMode: () => {} };
+  }
+  return context;
 }

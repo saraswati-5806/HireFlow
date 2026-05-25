@@ -16,7 +16,16 @@ function AppContent() {
   const darkMode = auth ? auth.darkMode : false;
 
   return (
-    <div className={darkMode ? "dark" : ""} style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div 
+      className={darkMode ? "dark" : ""} 
+      style={{ 
+        minHeight: "100vh", 
+        display: "flex", 
+        flexDirection: "column",
+        background: darkMode ? "#0f172a" : "#f8fafc", // Handles full page height background reset
+        transition: "background 0.3s ease"
+      }}
+    >
       <Navbar />
       
       <main style={{ flex: "1 0 auto" }}>

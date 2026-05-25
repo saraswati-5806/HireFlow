@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // Attached auth state tracking hooks
 
 export default function Home() {
   const navigate = useNavigate();
+  const { darkMode } = useAuth() || {};
 
   return (
     <div style={{ 
@@ -37,9 +39,16 @@ export default function Home() {
           </button>
         </div>
 
-        <div style={{ background: "rgba(224, 242, 254, 0.95)", padding: "2rem", borderRadius: "8px", border: "1px solid #0d9488", color: "#0f172a" }}>
+        <div style={{ 
+          background: darkMode ? "rgba(30, 41, 59, 0.95)" : "rgba(224, 242, 254, 0.95)", // Dynamic directive info banner
+          padding: "2rem", 
+          borderRadius: "8px", 
+          border: "1px solid #0d9488", 
+          color: darkMode ? "#f8fafc" : "#0f172a",
+          transition: "background 0.3s ease"
+        }}>
           <h3 style={{ margin: "0 0 0.5rem 0" }}>💡 Engineering Architecture Directive</h3>
-          <p style={{ margin: "0", fontSize: "0.95rem", lineHeight: "1.5", color: "#1e293b" }}>
+          <p style={{ margin: "0", fontSize: "0.95rem", lineHeight: "1.5", color: darkMode ? "#cbd5e1" : "#1e293b" }}>
             This interface compiles and maps operations straight to browser local memory cells. No isolated backend runtime engine threads are required to sustain current mock validation testing.
           </p>
         </div>
