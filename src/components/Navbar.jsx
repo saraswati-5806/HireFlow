@@ -1,9 +1,19 @@
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const { currentUser, logout, darkMode, setDarkMode } = useAuth() || {};
   const navigate = useNavigate();
+
+  // 🌍 Global DOM Synchronization Engine for Tailwind Dark Mode
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
 
   const handleLogoutClick = () => {
     logout();
@@ -21,7 +31,8 @@ export default function Navbar() {
       padding: "1rem 2rem",
       background: darkMode ? "#1e293b" : "#ffffff",
       boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-      borderBottom: darkMode ? "1px solid #334155" : "1px solid #e2e8f0"
+      borderBottom: darkMode ? "1px solid #334155" : "1px solid #e2e8f0",
+      transition: "background 0.3s ease, border 0.3s ease" // Smooth layout transitions
     }}>
       <div style={{ fontWeight: "bold", fontSize: "1.3rem", color: "#0d9488", cursor: "pointer" }} onClick={() => navigate("/")}>
         HireFlow 🚀
